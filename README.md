@@ -1,0 +1,2 @@
+# Sessions-V2
+A mobile ionic 2 application for capturing session attendance.
