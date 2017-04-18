@@ -1,0 +1,36 @@
+<ion-header>
+  <ion-navbar color="p-primary-dark" padding-top>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Sessions</ion-title>
+    <ion-buttons end class="navbar-btns">
+      <button ion-button icon-only (tap)="toggleSearchBox()">
+         <ion-icon name="search"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+  <ion-toolbar color="p-primary-dark">
+    <ion-item>
+      <ion-label>Date:</ion-label>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="2017-03-27" max="2017-04-08" [(ngModel)]="filterDate"></ion-datetime>
+    </ion-item>
+    <ion-item class="picker">
+      <ion-label>Room:</ion-label>
+      <div class="picker-box" item-content>
+        <div class="picker-text">{{filterRoom}}</div>
+        <button aria-haspopup="true" class="item-cover" ion-button="item-cover" type="button" (click)="openFilterRooms()"></button>
+      </div>
+    </ion-item>
+    <ion-item *ngIf="showSearchFilter">
+      <ion-label>Search:</ion-label>
+      <ion-input type="text"></ion-input>
+    </ion-item>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="{{showSearchFilter ? 'search-open' : ''}}">
+    Sessions Page
+  </div>
+</ion-content>

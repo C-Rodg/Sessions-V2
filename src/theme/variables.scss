@@ -28,9 +28,34 @@ $colors: (
   secondary:  #32db64,
   danger:     #f53d3d,
   light:      #f4f4f4,
-  dark:       #222
+  dark:       #222,
+
+  p-primary-dark : #00796b,
+  p-primary : #009688,
+  p-primary-light : #B2DFDB,
+  p-text : #FFFFFF,
+  p-accent : #607d8b,
+  p-text-dark : #212121,
+  p-text-secondary : #757575,
+  p-divider : #BDBDBD,
+  white-divider : #E5E5E5,
+  p-danger : #e74c3c
 );
 
+// Changing Select Radio Button color
+$alert-md-button-text-color: color($colors, p-primary-dark);
+
+// Hide bottom box shadow on text inputs
+$text-input-md-show-focus-highlight: false;
+
+// Change DateTime picker color
+.picker-md .picker-opt.picker-opt-selected {
+  color: color($colors, p-primary-dark) !important;
+}
+
+.picker-md .picker-button {
+  color: color($colors, p-primary-dark) !important;
+}
 
 // App iOS Variables
 // --------------------------------------------------

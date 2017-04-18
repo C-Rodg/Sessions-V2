@@ -3,8 +3,8 @@ import { Nav, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { HomePage } from '../pages/home/home';
-import { ListPage } from '../pages/list/list';
+import { SessionsPage } from '../pages/sessions/sessions';
+import { SettingsPage } from '../pages/settings/settings';
 
 @Component({
   templateUrl: 'app.html'
@@ -12,33 +12,48 @@ import { ListPage } from '../pages/list/list';
 export class MyApp {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any = HomePage;
+  rootPage: any = SessionsPage;
 
-  pages: Array<{title: string, component: any}>;
+  pages: Array<{title: string, component: any, icon: string}>;
+  pendingUploads : number = 0;
 
   constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
     this.initializeApp();
 
-    // used for an example of ngFor and navigation
-    this.pages = [
-      { title: 'Home', component: HomePage },
-      { title: 'List', component: ListPage }
+    // Create side menu
+    this.pages = [     
+      { title: 'Sessions', component: SessionsPage, icon: 'home'},
+      { title: 'Sync Sessions', component: '', icon: 'refresh'},
+      { title: 'Upload Scans', component: '', icon: 'cloud-upload'},
+      { title: 'Settings', component: SettingsPage, icon: 'settings'},
+      { title: 'Exit', component: '', icon: 'exit'}
     ];
 
   }
 
+  // Handle initialization of app
   initializeApp() {
     this.platform.ready().then(() => {
-      // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     });
   }
 
+  // Click handler for side menu
   openPage(page) {
-    // Reset the content nav to have just this page
-    // we wouldn't want the back button to show in this scenario
-    this.nav.setRoot(page.component);
+    if (page.icon === 'home' || page.icon === 'settings') {
+      this.nav.setRoot(page.component);
+    } else if (page.icon === 'refresh') {
+      //TODO: REFRESH SESSIONS/AC...
+    } else if (page.icon === 'cloud-upload') {
+      // TODO: UPLOAD PENDING COUNTS...
+    } else if (page.icon === 'exit') {
+      // TODO: EXIT APPLICATION...
+    }
+  }
+
+  // Calculate Pending Uploads
+  getPendingUploads() {
+    // TODO: get pending uploads, may need to run in zone to get view to recognize updated count...
   }
 }

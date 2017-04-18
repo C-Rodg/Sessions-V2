@@ -1,0 +1,23 @@
+page-sessions {
+    .content-md {
+        background-color: #e5e5e5;
+    } 
+    
+    .search-open {
+        margin-top: 60px;
+    }
+
+    .picker {
+        .label-md {
+            color: #999;
+        }
+
+        .picker-box {
+            padding: 13px 8px 13px 16px;
+
+            button {
+                height: 100%;
+            }
+        }
+    }
+}
