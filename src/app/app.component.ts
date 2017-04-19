@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, Platform } from 'ionic-angular';
+import { Nav, Platform, LoadingController, ToastController } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
@@ -15,9 +15,14 @@ export class MyApp {
   rootPage: any = SessionsPage;
 
   pages: Array<{title: string, component: any, icon: string}>;
-  pendingUploads : number = 0;
+  pendingUploads : number = 23;
 
-  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(public platform: Platform, 
+        public statusBar: StatusBar, 
+        public splashScreen: SplashScreen,
+        private loadingCtrl: LoadingController,
+        private toastCtrl: ToastController   
+  ) {
     this.initializeApp();
 
     // Create side menu
@@ -44,11 +49,42 @@ export class MyApp {
     if (page.icon === 'home' || page.icon === 'settings') {
       this.nav.setRoot(page.component);
     } else if (page.icon === 'refresh') {
-      //TODO: REFRESH SESSIONS/AC...
+      // TODO: SYNC SESSIONS AND REFRESH ACCESS LISTS
+      let loader = this.loadingCtrl.create({
+        content: 'Syncing Sessions...',
+        dismissOnPageChange: true
+      });    
+      loader.present();
+      // TODO: Faking time to hide...
+      setTimeout(() => {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: "Finished syncing sessions!",
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+      }, 3000);
     } else if (page.icon === 'cloud-upload') {
       // TODO: UPLOAD PENDING COUNTS...
+      let loader = this.loadingCtrl.create({
+        content: `Uploading ${this.pendingUploads} Scans...`,
+        dismissOnPageChange: true
+      });
+      loader.present();
+      // TODO: Faking time to hide...
+      setTimeout(() => {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: `Finished uploading ${this.pendingUploads} scans!`,
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+        this.pendingUploads = 0;
+      }, 3200);
     } else if (page.icon === 'exit') {
-      // TODO: EXIT APPLICATION...
+      window.location.href = "http://localhost/navigate/home";  
     }
   }
 

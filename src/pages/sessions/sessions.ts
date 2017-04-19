@@ -3,7 +3,7 @@ import { NavController, PickerController } from 'ionic-angular';
 import { SessionDetailPage } from '../session-detail/session-detail'
 import * as moment from 'moment';
 
-// TODO: sort by text? - except -none-
+// TODO: REPLACE WITH ACTUAL API CALLS
 const roomsArray = [
   { text: '-None-', value: '' },
   { text: 'Maple Room 1', value: 'Maple Room 1' },
@@ -42,15 +42,16 @@ export class SessionsPage {
   showSearchFilter: boolean = false;
   filterSearch: string = "";
   fullSessionList: Array<any> = [];
+  roomList: Array<any> = [];
   
   constructor(public navCtrl: NavController, private pickerCtrl: PickerController) {
-    this.fullSessionList = this.parseDateValues(sessionsArray);    
+    this.fullSessionList = this.parseDateValues(sessionsArray);   
+    this.roomList = roomsArray; 
   }
 
   // Helper - Parse dates/times for display values
   parseDateValues(arr) {
     return arr.map((session) => {
-
         return {
           Topic: session.Topic,
           TrackAttendance: session.TrackAttendance,
@@ -75,11 +76,6 @@ export class SessionsPage {
     this.filterSearch = "";
   }
 
-  // Filter by text
-  onSearchInput(val) {
-    
-  }
-
   // Open custom picker, set current room filter
   openFilterRooms() {
       let picker = this.pickerCtrl.create();
@@ -93,7 +89,7 @@ export class SessionsPage {
             this.filterRoom = data.rooms.value;         
         }
       });
-      const idx = roomsArray.findIndex((el) => {
+      const idx = this.roomList.findIndex((el) => {
         return el.value === this.filterRoom;
       });
       picker.addColumn({
@@ -101,13 +97,9 @@ export class SessionsPage {
         align: 'center',
         selectedIndex: idx,
         columnWidth: '100%',
-        options: roomsArray
+        options: this.roomList
       });      
       picker.present();
   }
 
-  // DEV - LOG VALUE
-  logFilter() {
-    console.log(this.filterDate);
-  }
 }

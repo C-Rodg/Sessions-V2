@@ -39,12 +39,11 @@
             <h2>{{session.Topic}}</h2>
             <p>{{session.Location}}</p>
             <p class="list__sessiondetials--top">{{session.StartTime}} - {{session.EndTime}}</p>
-            <div *ngIf="session.TrackAttendance" class="list__tracking"><ion-icon name="md-locate"></ion-icon></div>
+            <div *ngIf="session.TrackAttendance" class="list__tracking"><ion-icon name="md-key"></ion-icon></div>
           </ion-item>
         </ion-list>
       </ion-card>
     </div>
-
-    <button (click)="logFilter()">Log Filter</button>
+    
   </div>
 </ion-content>
