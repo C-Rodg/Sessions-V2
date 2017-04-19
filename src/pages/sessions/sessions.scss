@@ -45,5 +45,15 @@ page-sessions {
             right: 12px;
             font-size: 1.3rem;
         }
+
+        .list__tracking {
+            position: absolute;
+            bottom: 6px;
+            right: 12px;
+
+            ion-icon {
+                color: color($colors, p-primary-dark);
+            }
+        }
     }
 }

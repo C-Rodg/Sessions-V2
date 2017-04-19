@@ -13,7 +13,7 @@
   <ion-toolbar color="p-primary-dark">
     <ion-item>
       <ion-label>Date:</ion-label>
-      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="2017-03-27" max="2017-04-08" [(ngModel)]="filterDate" (ionChange)="updateDateFilter()"></ion-datetime>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="2017-03-27" max="2017-04-08" [(ngModel)]="filterDate"></ion-datetime>
     </ion-item>
     <ion-item class="picker">
       <ion-label>Room:</ion-label>
@@ -24,7 +24,7 @@
     </ion-item>
     <ion-item *ngIf="showSearchFilter">
       <ion-label>Search:</ion-label>
-      <ion-input type="text" (input)="onSearchInput($event.target.value)"></ion-input>
+      <ion-input type="text" [(ngModel)]="filterSearch"></ion-input>
     </ion-item>
   </ion-toolbar>
 </ion-header>
@@ -32,13 +32,14 @@
 <ion-content>
   <div class="{{showSearchFilter ? 'search-open' : ''}}">
     
-    <div *ngFor="let session of filteredSessions;">
+    <div *ngFor="let session of (fullSessionList | filterDates:filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
       <ion-card tappable (tap)="goToSession(session)">
         <ion-list no-lines class="list__session">
           <ion-item class="list__sessiondetails">
-            <h2>{{session.topic}}</h2>
-            <p>{{session.location}}</p>
-            <p class="list__sessiondetials--top">{{session.start}} - {{session.end}}</p>
+            <h2>{{session.Topic}}</h2>
+            <p>{{session.Location}}</p>
+            <p class="list__sessiondetials--top">{{session.StartTime}} - {{session.EndTime}}</p>
+            <div *ngIf="session.TrackAttendance" class="list__tracking"><ion-icon name="md-locate"></ion-icon></div>
           </ion-item>
         </ion-list>
       </ion-card>

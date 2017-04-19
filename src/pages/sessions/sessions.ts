@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController, PickerController } from 'ionic-angular';
 import { SessionDetailPage } from '../session-detail/session-detail'
+import * as moment from 'moment';
 
 // TODO: sort by text? - except -none-
 const roomsArray = [
@@ -15,18 +16,19 @@ const roomsArray = [
 ];
 
 const sessionsArray = [
-  { topic: 'Pre Con - Training Workshop Desktop I', location: 'Kaveri 1', start: '08:00 AM', end: '10:00 AM'},
-  { topic: 'Pre Con - Training Workshop Desktop II', location: 'Kaveri 1', start: '10:00 AM', end: '12:00 PM'},
-  { topic: 'Certification', location: 'Kaveri 2', start: '08:00 AM', end: '10:00 AM'},
-  { topic: 'Desktop I', location: 'Kaveri 3', start: '08:00 AM', end: '10:00 AM'},
-  { topic: 'Desktop II', location: 'Maple Room 1', start: '08:00 AM', end: '10:00 AM'},
-  { topic: 'Desktop III', location: 'Maple Room 2', start: '10:00 AM', end: '12:00 PM'},
-  { topic: 'Server 10 Qualified Associate I', location: 'Maple Room 3', start: '12:00 PM', end: '02:00 PM'},
-  { topic: 'Server 10 Qualified Associate II', location: 'Maple Room 3', start: '02:00 PM', end: '04:00 PM'},
-  { topic: 'Server 10 Qualified Associate III', location: 'Maple Room 2', start: '04:00 PM', end: '06:00 PM'},
-  { topic: 'Server Administration I', location: 'Maple Room 1', start: '10:00 AM', end: '12:00 PM'},
-  { topic: 'Server Administration II', location: 'Maple Room 6', start: '03:00 PM', end: '05:00 PM'},
-  { topic: 'Server Administration III', location: 'Kaveri 1', start: '01:00 PM', end: '03:00 PM'},
+  { Topic: 'Pre Con - Training Workshop Desktop I', Location: 'Kaveri 1', StartDateTime: '2017-04-01T13:00:20.789Z', EndDateTime: '2017-04-01T15:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Pre Con - Training Workshop Desktop II', Location: 'Kaveri 1', StartDateTime: '2017-03-29T13:00:20.789Z', EndDateTime: '2017-03-29T15:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Certification', Location: 'Kaveri 2', StartDateTime: '2017-04-02T13:00:20.789Z', EndDateTime: '2017-04-02T15:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Desktop I', Location: 'Kaveri 3', StartDateTime: '2017-04-02T08:00:20.789Z', EndDateTime: '2017-04-02T10:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Desktop II', Location: 'Maple Room 1', StartDateTime: '2017-04-01T10:00:20.789Z', EndDateTime: '2017-04-01T12:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Desktop III', Location: 'Maple Room 2', StartDateTime: '2017-03-29T12:00:20.789Z', EndDateTime: '2017-03-29T14:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Server 10 Qualified Associate I', Location: 'Maple Room 3', StartDateTime: '2017-04-02T14:00:20.789Z', EndDateTime: '2017-04-02T17:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Server 10 Qualified Associate II', Location: 'Maple Room 3', StartDateTime: '2017-04-02T16:00:20.789Z', EndDateTime: '2017-04-02T18:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Server 10 Qualified Associate III', Location: 'Maple Room 2', StartDateTime: '2017-04-01T16:00:20.789Z', EndDateTime: '2017-04-01T19:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Server Administration I', Location: 'Maple Room 1', StartDateTime: '2017-04-01T12:00:20.789Z', EndDateTime: '2017-04-01T14:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Server Administration II', Location: 'Maple Room 6', StartDateTime: '2017-04-01T08:00:20.789Z', EndDateTime: '2017-04-01T10:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Server Administration III', Location: 'Kaveri 1', StartDateTime: '2017-04-02T10:00:20.789Z', EndDateTime: '2017-04-02T12:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Multi-Day Event', Location: 'Maple Room 1', StartDateTime: '2017-03-29T14:00:20.789Z', EndDateTime: '2017-04-03T12:00:20.789Z', TrackAttendance: true},
 ];
 
 @Component({
@@ -35,20 +37,30 @@ const sessionsArray = [
 })
 export class SessionsPage {
 
-  filterDate: string = "2017-04-01T13:47:20.789Z";
+  filterDate: string = "2017-03-29T13:47:20.789Z";
   filterRoom: string = "";
   showSearchFilter: boolean = false;
   filterSearch: string = "";
-  sessionList: Array<any> = [];
-  filteredSessions: Array<any> = [];
+  fullSessionList: Array<any> = [];
   
   constructor(public navCtrl: NavController, private pickerCtrl: PickerController) {
-    this.sessionList = sessionsArray;
+    this.fullSessionList = this.parseDateValues(sessionsArray);    
   }
 
-  // Change in Date Event
-  updateDateFilter() {
-    console.log(this.filterDate);
+  // Helper - Parse dates/times for display values
+  parseDateValues(arr) {
+    return arr.map((session) => {
+
+        return {
+          Topic: session.Topic,
+          TrackAttendance: session.TrackAttendance,
+          Location: session.Location,
+          StartDateTime: session.StartDateTime,
+          EndDateTime: session.EndDateTime,
+          StartTime: moment(session.StartDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('hh:mm A'),
+          EndTime: moment(session.EndDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('hh:mm A')
+        };
+    });
   }
 
   // Go to the session detail page
@@ -65,7 +77,7 @@ export class SessionsPage {
 
   // Filter by text
   onSearchInput(val) {
-    console.log(val);
+    
   }
 
   // Open custom picker, set current room filter
@@ -78,8 +90,7 @@ export class SessionsPage {
       picker.addButton({
         text: 'Done',
         handler: (data: any) => {
-          console.log(data);
-          this.filterRoom = data.rooms.value;
+            this.filterRoom = data.rooms.value;         
         }
       });
       const idx = roomsArray.findIndex((el) => {
