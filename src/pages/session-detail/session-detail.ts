@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 
-
 @Component({
-  selector: 'session-tile',
-  templateUrl: 'session-tile.html'
+  selector: 'page-session-detail',
+  templateUrl: 'session-detail.html'
 })
-export class SessionTile {  
-  
+export class SessionDetailPage {
+
   constructor(public navCtrl: NavController) {
-    
+
   }
 
 }

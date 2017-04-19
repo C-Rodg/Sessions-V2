@@ -20,4 +20,30 @@ page-sessions {
             }
         }
     }
+
+    .list__session {
+        border-left: 3px solid color($colors, p-primary);
+        border-width: 3px;
+
+        h2 {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        ion-label {
+            margin: 21px 0 8px 0;
+        }
+
+        .list__sessiondetails {
+            padding-left: 10px;
+        }
+
+        .list__sessiondetials--top {
+            position: absolute;
+            top: 5px;
+            right: 12px;
+            font-size: 1.3rem;
+        }
+    }
 }

@@ -13,7 +13,7 @@
   <ion-toolbar color="p-primary-dark">
     <ion-item>
       <ion-label>Date:</ion-label>
-      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="2017-03-27" max="2017-04-08" [(ngModel)]="filterDate"></ion-datetime>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="2017-03-27" max="2017-04-08" [(ngModel)]="filterDate" (ionChange)="updateDateFilter()"></ion-datetime>
     </ion-item>
     <ion-item class="picker">
       <ion-label>Room:</ion-label>
@@ -24,13 +24,26 @@
     </ion-item>
     <ion-item *ngIf="showSearchFilter">
       <ion-label>Search:</ion-label>
-      <ion-input type="text"></ion-input>
+      <ion-input type="text" (input)="onSearchInput($event.target.value)"></ion-input>
     </ion-item>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <div class="{{showSearchFilter ? 'search-open' : ''}}">
-    Sessions Page
+    
+    <div *ngFor="let session of filteredSessions;">
+      <ion-card tappable (tap)="goToSession(session)">
+        <ion-list no-lines class="list__session">
+          <ion-item class="list__sessiondetails">
+            <h2>{{session.topic}}</h2>
+            <p>{{session.location}}</p>
+            <p class="list__sessiondetials--top">{{session.start}} - {{session.end}}</p>
+          </ion-item>
+        </ion-list>
+      </ion-card>
+    </div>
+
+    <button (click)="logFilter()">Log Filter</button>
   </div>
 </ion-content>
