@@ -42,6 +42,8 @@ $colors: (
   p-danger : #e74c3c
 );
 
+// Overrides 
+
 // Changing Select Radio Button color
 $alert-md-button-text-color: color($colors, p-primary-dark);
 
@@ -57,25 +59,32 @@ $text-input-md-show-focus-highlight: false;
   color: color($colors, p-primary-dark) !important;
 }
 
-// App iOS Variables
-// --------------------------------------------------
-// iOS only Sass variables can go here
 
+// Global Component Styles
 
+.inline-card-button {
+  .inline-card-icon {
+        border-right: 1px solid color($colors, white-divider);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+    }
 
+    ion-col {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
 
-// App Material Design Variables
-// --------------------------------------------------
-// Material Design only Sass variables can go here
+    .secondary-text {
+      line-height: 1.1;
+      color: color($colors, p-text-secondary);
 
-
-
-
-// App Windows Variables
-// --------------------------------------------------
-// Windows only Sass variables can go here
-
-
+      ion-icon {
+        vertical-align: middle;
+      }
+    }
+}
 
 
 // App Theme

@@ -6,6 +6,9 @@ import { MyApp } from './app.component';
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
 import { SessionDetailPage } from '../pages/session-detail/session-detail';
+
+import { DeviceModal } from '../pages/settings/device-modal/device-modal';
+
 import { FilterDates } from '../pipes/FilterDates';
 import { FilterRooms } from '../pipes/FilterRooms';
 import { FilterSessionText } from '../pipes/FilterSessionText';
@@ -21,7 +24,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     SessionDetailPage,
     FilterDates,
     FilterRooms,
-    FilterSessionText
+    FilterSessionText,
+    DeviceModal
   ],
   imports: [
     BrowserModule,
@@ -34,7 +38,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     MyApp,
     SessionsPage,
     SettingsPage,
-    SessionDetailPage
+    SessionDetailPage,
+    DeviceModal
   ],
   providers: [
     StatusBar,

@@ -8,5 +8,106 @@
 </ion-header>
 
 <ion-content>
- Settings Page
+  <div class="settings-container">
+
+    <ion-card class="inline-card-button" (tap)="handleChangeEvents()">
+      <ion-row>
+        <ion-col class="inline-card-icon" col-3 text-center stretch>
+          <ion-icon name="ios-swap"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <h1>Change Event</h1>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="inline-card-button" (tap)="handleSyncSessions()">
+      <ion-row>
+        <ion-col class="inline-card-icon" col-3 text-center stretch>
+          <ion-icon name="ios-refresh"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <h1>Sync Sessions</h1>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="inline-card-button" (tap)="handleUploadScans()">
+      <ion-row>
+        <ion-col class="inline-card-icon" col-3 text-center stretch>
+          <ion-icon name="ios-cloud-upload-outline"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <h1>Upload Scans</h1>
+          <p class="secondary-text">Pending Uploads: {{pendingUploads}}</p>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="inline-card-button" (tap)="handleEditDeviceName()">
+      <ion-row>
+        <ion-col class="inline-card-icon" col-3 text-center stretch>
+          <ion-icon name="ios-create-outline"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <h1>Edit Device Name</h1>
+          <p class="secondary-text">{{deviceName}}</p>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-label>Autoupload every {{backgroundUploadWait}} mins</ion-label>
+            <ion-range min="0" max="10" step="1" snaps="true" color="p-accent" [(ngModel)]="backgroundUploadWait" (ionChange)="startNewUploadTime()">
+              <ion-icon range-left isActive="false" name="ios-timer-outline"></ion-icon>
+              <ion-icon range-right name="timer" name="ios-timer"></ion-icon>
+            </ion-range>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-label>Access Control</ion-label>
+            <ion-toggle color="p-accent" [(ngModel)]="accessControl" (ionChange)="saveSettings()"></ion-toggle>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row [hidden]="!accessControl">
+        <ion-col>
+          <ion-item>
+            <ion-label>Access Control Override</ion-label>
+            <ion-toggle color="p-accent" [(ngModel)]="accessControlOverride" (ionChange)="saveSettings()"></ion-toggle>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <ion-item>
+            <ion-label>Capacity Check</ion-label>
+            <ion-toggle color="p-accent" [(ngModel)]="capacityCheck" (ionChange)="saveSettings()"></ion-toggle>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="inline-card-button">
+      <ion-row>
+        <ion-col class="inline-card-icon" col-3 text-center stretch>
+          <ion-icon name="ios-information-circle-outline"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <h1>About</h1>
+          <p class="secondary-text">{{appInfo}}</p>
+          <p class="secondary-text">{{deviceInfo}}</p>
+          <p class="secondary-text">Sled-scanner: {{scannerStatus}}</p>
+          <p class="secondary-text">Cameras: front <ion-icon name="{{'ios-' + cameraFront }}"></ion-icon> | back <ion-icon name="{{'ios-' + cameraBack }}"></ion-icon></p>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+  </div>
 </ion-content>
