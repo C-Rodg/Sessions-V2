@@ -2,4 +2,15 @@ page-settings {
     .content-md {
         background-color: #e5e5e5;
     }
+
+    .ac-override {
+        max-height: 70px;
+        opacity: 1;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .ac-override.no-ac {
+        max-height: 0;
+        opacity: 0;
+    }
 }

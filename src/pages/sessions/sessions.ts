@@ -65,9 +65,8 @@ export class SessionsPage {
   }
 
   // Go to the session detail page
-  goToSession(session) {
-    console.log("GO TO THIS SESSION", session);
-    this.navCtrl.push(SessionDetailPage);
+  goToSession(session) {    
+    this.navCtrl.push(SessionDetailPage, session);
   }
 
   // Toggle showing of search filter

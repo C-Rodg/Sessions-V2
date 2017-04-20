@@ -76,7 +76,7 @@
           </ion-item>
         </ion-col>
       </ion-row>
-      <ion-row [hidden]="!accessControl">
+      <ion-row [ngClass]="{'no-ac' : !accessControl}" class="ac-override">
         <ion-col>
           <ion-item>
             <ion-label>Access Control Override</ion-label>

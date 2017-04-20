@@ -3,10 +3,83 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Session Detail</ion-title>
+    <ion-title>Session Details</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
- Session Detail Page
+ <div class="session-detail-content">
+  
+    <ion-card class="detail__title">
+      <ion-list no-lines class="green-border-left">
+        <ion-item>
+          <h1>{{sessionTitle}}</h1>
+          <p>{{room}}</p>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+
+    <ion-card class="detail__date inline-card-button">
+      <ion-row >
+        <ion-col col-3 text-center stretch class="inline-card-icon">
+          <ion-icon name="time"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <p class="date secondary-text">{{date}}</p>
+          <h1 class="time">{{startTime}} - {{endTime}}</h1>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="detail__accesslist inline-card-button" (tap)="refreshAccessList()">
+      <ion-row >
+        <ion-col col-3 text-center stretch class="inline-card-icon">
+          <ion-icon name="refresh"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <p class="date secondary-text">Access List Count</p>
+          <h1 class="time">{{accessListCount}} people</h1>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-row class="counts-row">
+      <ion-col col-6 class="counts-box">
+        <ion-card>
+          <ion-row>
+            <ion-col text-center>
+              <h1>{{scannedCount}}</h1>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col text-center>
+              <h2>Scanned</h2>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+      </ion-col>
+
+       <ion-col col-6 class="counts-box">
+        <ion-card (tap)="uploadPendingScans()">
+          <ion-row>
+            <ion-col text-center>
+              <h1>{{pendingUploadCount}}</h1>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col text-center>
+              <h2>Pending</h2>
+            </ion-col>
+          </ion-row>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+  </div>
 </ion-content>
+
+<ion-footer class="detail__footer">
+  <ion-toolbar>
+    <button color="p-primary" ion-button block large (tap)="getScanPage()">Begin Scanning</button>
+  </ion-toolbar>
+</ion-footer>

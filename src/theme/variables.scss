@@ -86,6 +86,11 @@ $text-input-md-show-focus-highlight: false;
     }
 }
 
+.green-border-left {
+  border-left: 3px solid color($colors, p-primary);
+  border-width: 3px !important;
+}
+
 
 // App Theme
 // --------------------------------------------------
