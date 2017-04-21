@@ -21,7 +21,7 @@ const sessionsArray = [
   { Topic: 'Certification', Location: 'Kaveri 2', StartDateTime: '2017-04-02T13:00:20.789Z', EndDateTime: '2017-04-02T15:00:20.789Z', TrackAttendance: true},
   { Topic: 'Desktop I', Location: 'Kaveri 3', StartDateTime: '2017-04-02T08:00:20.789Z', EndDateTime: '2017-04-02T10:00:20.789Z', TrackAttendance: true},
   { Topic: 'Desktop II', Location: 'Maple Room 1', StartDateTime: '2017-04-01T10:00:20.789Z', EndDateTime: '2017-04-01T12:00:20.789Z', TrackAttendance: true},
-  { Topic: 'Desktop III', Location: 'Maple Room 2', StartDateTime: '2017-03-29T12:00:20.789Z', EndDateTime: '2017-03-29T14:00:20.789Z', TrackAttendance: false},
+  { Topic: 'Desktop III', Location: 'Maple Room 2', StartDateTime: '2017-03-29T17:00:20.789Z', EndDateTime: '2017-03-29T19:00:20.789Z', TrackAttendance: false},
   { Topic: 'Server 10 Qualified Associate I', Location: 'Maple Room 3', StartDateTime: '2017-04-02T14:00:20.789Z', EndDateTime: '2017-04-02T17:00:20.789Z', TrackAttendance: false},
   { Topic: 'Server 10 Qualified Associate II', Location: 'Maple Room 3', StartDateTime: '2017-04-02T16:00:20.789Z', EndDateTime: '2017-04-02T18:00:20.789Z', TrackAttendance: true},
   { Topic: 'Server 10 Qualified Associate III', Location: 'Maple Room 2', StartDateTime: '2017-04-01T16:00:20.789Z', EndDateTime: '2017-04-01T19:00:20.789Z', TrackAttendance: false},
@@ -58,8 +58,8 @@ export class SessionsPage {
           Location: session.Location,
           StartDateTime: session.StartDateTime,
           EndDateTime: session.EndDateTime,
-          StartTime: moment(session.StartDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('hh:mm A'),
-          EndTime: moment(session.EndDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('hh:mm A')
+          StartTime: moment(session.StartDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('h:mm A'),
+          EndTime: moment(session.EndDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('h:mm A')
         };
     });
   }

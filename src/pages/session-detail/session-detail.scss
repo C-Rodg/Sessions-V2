@@ -27,6 +27,7 @@ page-session-detail {
 
         .time {
             margin-bottom: 0;
+            font-size: 2.1rem;
         }
     }
 
@@ -46,11 +47,13 @@ page-session-detail {
         h1 {
             margin: 0;
             padding: 0;  
-            font-size: 6rem;          
+            font-size: 6rem;  
+            line-height: 1;        
         }
         
         h2 {
-            font-size:2.2rem;
+            line-height: 1;
+            font-size: 2.2rem;
         }
 
         ion-card {
@@ -58,6 +61,13 @@ page-session-detail {
             flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+
+        .count {
+            padding-bottom: 0;
+        }
+        .count-text {
+            padding-top: 0;
         }
     }
 

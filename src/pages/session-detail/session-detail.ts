@@ -23,12 +23,12 @@ export class SessionDetailPage {
       this.room = Location;
       const start = moment(StartDateTime);
       const end = moment(EndDateTime);
-      this.startTime = start.format("HH:mm A");
-      this.endTime = end.format("HH:mm A");
+      this.startTime = start.format("h:mm A");
+      this.endTime = end.format("h:mm A");
       if (start.isSame(end, 'day')) {
         this.date = start.format("dddd, MMM Do, YYYY");
       } else {
-        this.date = start.format("dddd, MMM Do") + " - " + end.format("dddd, MMM Do, YYYY"); 
+        this.date = start.format("ddd, MMM Do") + " - " + end.format("ddd, MMM Do, YYYY"); 
       }
     }
   }
