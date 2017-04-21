@@ -20,8 +20,6 @@ export class SessionDetailPage {
   pendingUploadCount: Number = 28;
   accessControl: Boolean = false;
 
-  popoverPage: any;
-
   constructor(public navCtrl: NavController, 
       private params: NavParams,
       private popoverCtrl: PopoverController
@@ -42,7 +40,7 @@ export class SessionDetailPage {
       }
       this.accessControl = TrackAttendance;
 
-      this.popoverPage = this.popoverCtrl.create(MoreInfoPopover);
+      // Get prev/next session, total pending uploads      
     }
   }
 
@@ -51,7 +49,23 @@ export class SessionDetailPage {
   }
 
   showPopover(ev) {
-    this.popoverPage.present({ ev });
+    const sessionDetails = {
+      totalPending: this.pendingUploadCount,
+      nextSession: {
+        title: 'Desktop IV',
+        startTime: '4:00 PM',
+        endTime: '7:00 PM',
+        date: 'Tues, Apr 2nd, 2017'
+      },
+      prevSession: {
+        title: 'Desktop II',
+        startTime: '10:00 AM',
+        endTime: '12:00 PM',
+        date: 'Mon, Apr 1st, 2017'
+      }
+    };
+    let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
+    pop.present({ ev });
   }
   
 }
