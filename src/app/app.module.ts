@@ -8,6 +8,7 @@ import { SettingsPage } from '../pages/settings/settings';
 import { SessionDetailPage } from '../pages/session-detail/session-detail';
 
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
+import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
 
 import { FilterDates } from '../pipes/FilterDates';
 import { FilterRooms } from '../pipes/FilterRooms';
@@ -25,7 +26,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     FilterDates,
     FilterRooms,
     FilterSessionText,
-    DeviceModal
+    DeviceModal,
+    MoreInfoPopover
   ],
   imports: [
     BrowserModule,
@@ -39,7 +41,8 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     SessionsPage,
     SettingsPage,
     SessionDetailPage,
-    DeviceModal
+    DeviceModal,
+    MoreInfoPopover
   ],
   providers: [
     StatusBar,
