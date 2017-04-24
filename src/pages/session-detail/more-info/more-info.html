@@ -1,6 +1,6 @@
 <ion-list class="more-info-popover">               
 
-            <button class="pop-item" ion-item>
+            <button class="pop-item" ion-item (tap)="uploadPending()">
                 <ion-row>
                     <ion-col class="pop__icon" col-2><ion-icon name="cloud-upload"></ion-icon></ion-col>
                     <ion-col class="pop__data">
@@ -10,26 +10,26 @@
                 </ion-row>
             </button>
 
-            <button ion-item class="pop-item">
+            <button ion-item class="pop-item" (tap)="navigateToPrevious()" *ngIf="prevSession.title">
                 <ion-row>                
                     <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-back"></ion-icon></ion-col>
                     <ion-col class="pop__data">
                         <div class="control">Previous Session:</div>
-                        <div class="title">Pre Con - Training Workshop Desktop II</div>
-                        <div class="date">Mon, Mar 30th, 2017</div>
-                        <div class="time">10:00 AM - 12:00 PM</div>
+                        <div class="title">{{prevSession.title}}</div>
+                        <div class="date">{{prevSession.startDate}}</div>
+                        <div class="time">{{prevSession.startTime}}</div>
                     </ion-col>                
                 </ion-row>
             </button>
 
-            <button ion-item class="pop-item">
+            <button ion-item class="pop-item" (tap)="navigateToNext()" *ngIf="nextSession.title">
                 <ion-row>                
                     <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-forward"></ion-icon></ion-col>
                     <ion-col class="pop__data">
                         <div class="control">Next Session:</div>
-                        <div class="title">Desktop IV</div>
-                        <div class="date">Mon, Mar 31st, 2017</div>
-                        <div class="time">10:00 AM - 12:00 PM</div>
+                        <div class="title">{{nextSession.title}}</div>
+                        <div class="date">{{nextSession.startDate}}</div>
+                        <div class="time">{{nextSession.startTime}}</div>
                     </ion-col>                
                 </ion-row>
             </button>

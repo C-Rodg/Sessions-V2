@@ -1,7 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, Platform, LoadingController, ToastController } from 'ionic-angular';
-import { StatusBar } from '@ionic-native/status-bar';
-import { SplashScreen } from '@ionic-native/splash-screen';
+import { Nav,  LoadingController, ToastController } from 'ionic-angular';
 
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
@@ -17,9 +15,7 @@ export class MyApp {
   pages: Array<{title: string, component: any, icon: string}>;
   pendingUploads : number = 23;
 
-  constructor(public platform: Platform, 
-        public statusBar: StatusBar, 
-        public splashScreen: SplashScreen,
+  constructor(
         private loadingCtrl: LoadingController,
         private toastCtrl: ToastController   
   ) {
@@ -37,11 +33,8 @@ export class MyApp {
   }
 
   // Handle initialization of app
-  initializeApp() {
-    this.platform.ready().then(() => {
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
-    });
+  initializeApp() {    
+
   }
 
   // Click handler for side menu

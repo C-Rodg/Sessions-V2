@@ -1,7 +1,19 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, PopoverController } from 'ionic-angular';
+import { NavController, NavParams, PopoverController, LoadingController, ToastController } from 'ionic-angular';
 import * as moment from 'moment';
 import { MoreInfoPopover } from './more-info/more-info';
+
+import { sessionsArray } from '../../test-data/mock-data';
+
+interface Session {
+  title? : string,
+  room? : string,
+  startDate? : string,
+  rangeDate? : string,
+  startTime? : string,
+  endTime? : string,
+  accessControl? : boolean
+}
 
 @Component({
   selector: 'page-session-detail',
@@ -9,60 +21,114 @@ import { MoreInfoPopover } from './more-info/more-info';
 })
 export class SessionDetailPage {
 
-  sessionTitle: string = "";
-  room: string = "";
-  startDate: string = "";
-  rangeDate: string = "";
-  startTime: string = "";
-  endTime: string = "";
+  orderedSessions: Array<any> = [];  
+  session : Session = {};
+  prevSession: Session = {};
+  nextSession: Session = {};
+
   accessListCount: Number = 84;
   scannedCount: Number = 237;
   pendingUploadCount: Number = 28;
-  accessControl: Boolean = false;
+
+
 
   constructor(public navCtrl: NavController, 
       private params: NavParams,
-      private popoverCtrl: PopoverController
-  ) {
-    if (this.params.data) {
-      const { Topic, TrackAttendance, Location, StartDateTime, EndDateTime } = this.params.data;
-      this.sessionTitle = Topic;
-      this.room = Location;
-      const start = moment(StartDateTime);
-      const end = moment(EndDateTime);
-      this.startTime = start.format("h:mm A");
-      this.endTime = end.format("h:mm A");
-      if (start.isSame(end, 'day')) {
-        this.startDate = start.format("ddd, MMM Do, YYYY");
-      } else {
-        this.startDate = start.format("ddd, MMM Do") + " - ";
-        this.rangeDate = end.format("ddd, MMM Do, YYYY");
-      }
-      this.accessControl = TrackAttendance;
+      private popoverCtrl: PopoverController,
+      private toastCtrl: ToastController,
+      private loadingCtrl: LoadingController
+  ) {  }
 
-      // Get prev/next session, total pending uploads      
+  // Parse out Session details
+  ngOnInit() {
+    if (this.params.data) {
+      this.session = this.convertServerSessionToDisplay(this.params.data);
+      // Get prev/next session, total pending uploads   
+    }
+  }  
+
+  // Determine the Previous and Next Sessions
+  ionViewWillEnter() {
+    this.orderedSessions = this.orderSessions(sessionsArray, this.session.room);
+    const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, this.session.title);
+    if (currentSessionIndex > -1) {
+      if (currentSessionIndex !== 0) {
+        this.prevSession = this.convertServerSessionToDisplay(this.orderedSessions[currentSessionIndex - 1]);
+      }
+      if (currentSessionIndex !== this.orderedSessions.length -1) {
+        this.nextSession = this.convertServerSessionToDisplay(this.orderedSessions[currentSessionIndex + 1]);
+      }
     }
   }
 
+  // Helper - Convert server session to display session
+  convertServerSessionToDisplay(serverSess) {
+    const { Topic, TrackAttendance, Location, StartDateTime, EndDateTime } = serverSess;
+    const start = moment(StartDateTime);
+    const end = moment(EndDateTime);
+    let session: Session = {
+      title: Topic,
+      room: Location,
+      startTime: start.format("h:mm A"),
+      endTime: end.format("h:mm A"),
+      accessControl: TrackAttendance
+    };
+    if (start.isSame(end, 'day')) {
+      session.startDate = start.format('ddd, MMM Do, YYYY');
+    } else {
+      session.startDate = start.format('ddd, MMM Do') + ' - ';
+      session.rangeDate = end.format('ddd, MMM Do, YYYY');
+    }
+    return session;
+  }
+
+  // Helper - Filter and order room sessions
+  orderSessions(arr, room) {
+    return arr.filter((session) => {
+      return session.Location === room;
+    }).sort((a, b) => {
+      return moment(a.StartDateTime).diff(moment(b.StartDateTime));
+    });
+  }
+
+  // Helper - get current session index
+  getCurrentSessionIndex(arr, name) {
+    return arr.findIndex((sess) => {
+      return sess.Topic === name;
+    });
+  }
+
+  // Go to the scan page
   getScanPage() {
 
   }
 
+  // Refresh the Access List
+  refreshAccessList() {
+    let loader = this.loadingCtrl.create({
+      content: 'Refreshing access list...',
+      dismissOnPageChange: true
+    });    
+    loader.present();
+    // TODO: Faking refresh time
+    setTimeout(() => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: "Access lists refreshed!",
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+    }, 3000);
+  }
+
+  // Show the Popover for pending uploads, next/previous sessions
   showPopover(ev) {
+    // TODO: Create correct session details and present popover
     const sessionDetails = {
       totalPending: this.pendingUploadCount,
-      nextSession: {
-        title: 'Desktop IV',
-        startTime: '4:00 PM',
-        endTime: '7:00 PM',
-        date: 'Tues, Apr 2nd, 2017'
-      },
-      prevSession: {
-        title: 'Desktop II',
-        startTime: '10:00 AM',
-        endTime: '12:00 PM',
-        date: 'Mon, Apr 1st, 2017'
-      }
+      nextSession: this.nextSession,
+      prevSession: this.prevSession      
     };
     let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
     pop.present({ ev });

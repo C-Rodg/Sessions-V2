@@ -1,5 +1,15 @@
 import { Component } from '@angular/core';
-import { NavParams } from 'ionic-angular';
+import { NavParams, LoadingController, ToastController, ViewController, NavController } from 'ionic-angular';
+
+interface Session {
+  title? : string,
+  room? : string,
+  startDate? : string,
+  rangeDate? : string,
+  startTime? : string,
+  endTime? : string,
+  accessControl? : boolean
+}
 
 @Component({
   selector: 'more-info-popover',
@@ -7,18 +17,58 @@ import { NavParams } from 'ionic-angular';
 })
 export class MoreInfoPopover {
   pendingCount: Number = 32;
-  prevName: string = "Pre Con - Training Workshop Desktop III";
-  prevDate: string = "Tues, Apr 2nd, 2017";
-  
+  prevSession: Session = {};
+  nextSession: Session = {};    
 
-  constructor(private navParams: NavParams) {
+  constructor(private navParams: NavParams,
+      private toastCtrl: ToastController,
+      private loadingCtrl: LoadingController,
+      private viewCtrl: ViewController,
+      private navCtrl: NavController
+  ) {
+    
+  }
+  
+  // Parse out prev/next sessions, get pendingUploads
+  ngOnInit() {
+    const d = this.navParams.data;
+    if (d) {
+      this.prevSession = d.prevSession;
+      this.nextSession = d.nextSession;
+      this.pendingCount = d.totalPending;
+    }
+  }
+  
+  // Upload Pending Scans
+  uploadPending() {
+    let loader = this.loadingCtrl.create({
+      content: `Uploading ${this.pendingCount} scans...`,
+      dismissOnPageChange: true
+    });    
+    loader.present();
+    // TODO: Faking refresh time
+    setTimeout(() => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: `Finished uploading ${this.pendingCount} scans!`,
+        duration: 2500,
+        position: 'top'
+      });
+      this.pendingCount = 0;
+      this.viewCtrl.dismiss();
+      toast.present();      
+    }, 3000);
+  }
+
+  // Go to previous session in this room
+  navigateToPrevious() {
+    //this.navCtrl.getActive
     
   }
 
-  ngOnInit() {
-    if (this.navParams.data) {
+  // Go to next session in this room
+  navigateToNext() {
 
-    }
   }
 
 }

@@ -22,9 +22,9 @@
           <div center>scans</div>
         </ion-col>
         <ion-col class="detail__times" padding-left>
-          <p>{{startDate}}</p>
-          <p *ngIf="rangeDate">{{rangeDate}}</p>
-          <h2>{{startTime}}-{{endTime}}</h2>
+          <p>{{session.startDate}}</p>
+          <p *ngIf="session.rangeDate">{{session.rangeDate}}</p>
+          <h2>{{session.startTime}}-{{session.endTime}}</h2>
         </ion-col>
       </ion-row>
     </ion-card>
@@ -32,13 +32,13 @@
     <ion-card class="detail__title">
       <ion-list no-lines class="green-border-left">
         <ion-item>
-          <h1>{{sessionTitle}}</h1>
-          <p>{{room}}</p>
+          <h1>{{session.title}}</h1>
+          <p>{{session.room}}</p>
         </ion-item>
       </ion-list>
     </ion-card>
 
-    <ion-card class="detail__accesslist inline-card-button" (tap)="refreshAccessList()" *ngIf="accessControl">
+    <ion-card class="detail__accesslist inline-card-button" (tap)="refreshAccessList()" *ngIf="session.accessControl">
       <ion-row >
         <ion-col col-3 text-center stretch class="inline-card-icon">
           <ion-icon name="refresh"></ion-icon>
