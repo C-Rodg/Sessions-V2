@@ -141,7 +141,8 @@ export class SessionDetailPage {
     pop.onDidDismiss((data) => {
       if (data === 'next' || data === 'prev') {
         const sess = data === 'next' ? this.nextSession : this.prevSession;
-        this.navCtrl.push(SessionDetailPage, sess).then(() => {
+        const dir = data === 'next' ? 'forward' : 'back';
+        this.navCtrl.push(SessionDetailPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
           const idx = this.navCtrl.getActive().index;
           this.navCtrl.remove(idx - 1);
         });
