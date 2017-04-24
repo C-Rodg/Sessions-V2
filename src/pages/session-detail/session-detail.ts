@@ -41,10 +41,16 @@ export class SessionDetailPage {
 
   // Parse out Session details
   ngOnInit() {
-    if (this.params.data) {
-      this.session = this.convertServerSessionToDisplay(this.params.data);
-      // Get prev/next session, total pending uploads   
+    const d = this.params.data;
+    if (d) {
+      // If navParam is already in view format do nothing, else convert..
+      if (d.hasOwnProperty('title') && d.hasOwnProperty('room') && d.hasOwnProperty('startDate')) {
+        this.session = d;
+      } else {
+        this.session = this.convertServerSessionToDisplay(d);
+      }               
     }
+    // TODO: Get Upload Counts..
   }  
 
   // Determine the Previous and Next Sessions
@@ -132,6 +138,15 @@ export class SessionDetailPage {
     };
     let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
     pop.present({ ev });
+    pop.onDidDismiss((data) => {
+      if (data === 'next' || data === 'prev') {
+        const sess = data === 'next' ? this.nextSession : this.prevSession;
+        this.navCtrl.push(SessionDetailPage, sess).then(() => {
+          const idx = this.navCtrl.getActive().index;
+          this.navCtrl.remove(idx - 1);
+        });
+      }
+    });
   }
   
 }
