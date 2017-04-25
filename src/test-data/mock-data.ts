@@ -23,5 +23,5 @@ export const sessionsArray = [
   { Topic: 'Server Administration I', Location: 'Maple Room 1', StartDateTime: '2017-04-01T12:00:20.789Z', EndDateTime: '2017-04-01T14:00:20.789Z', TrackAttendance: false},
   { Topic: 'Server Administration II', Location: 'Maple Room 6', StartDateTime: '2017-04-01T08:00:20.789Z', EndDateTime: '2017-04-01T10:00:20.789Z', TrackAttendance: true},
   { Topic: 'Server Administration III', Location: 'Kaveri 1', StartDateTime: '2017-04-02T10:00:20.789Z', EndDateTime: '2017-04-02T12:00:20.789Z', TrackAttendance: false},
-  { Topic: 'Multi-Day Event', Location: 'Maple Room 1', StartDateTime: '2017-03-29T14:00:20.789Z', EndDateTime: '2017-04-03T12:00:20.789Z', TrackAttendance: true},
+  { Topic: 'Multi-Day Event all accross the world of the United States', Location: 'Maple Room 1', StartDateTime: '2017-03-29T14:00:20.789Z', EndDateTime: '2017-04-03T12:00:20.789Z', TrackAttendance: true},
 ];

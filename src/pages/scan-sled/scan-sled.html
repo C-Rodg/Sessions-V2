@@ -3,15 +3,51 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Scan</ion-title>
-    <ion-buttons end>
-      <button ion-button icon-only>
-        <ion-icon name="more"></ion-icon>
-      </button>
-    </ion-buttons>
+    <ion-title>Scan</ion-title>    
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-    Scan Sled
+  <div class="sled-scan-container">
+
+    <ion-card class="current-scan-details">
+      <ion-row>
+        <ion-col col-3 text-center class="scan-numbers" stretch>
+          <div class="scan-number">210</div>
+          <div center>scans</div>
+        </ion-col>
+        <ion-col class="scan-info" padding-left>
+          <h2>{{session.title}}</h2>
+          <p class="date">{{session.startDate}}</p>
+          <p class="range-date" *ngIf="session.rangeDate">{{session.rangeDate}}</p>
+          <p class="time">{{session.startTime}} - {{session.endTime}}</p>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="square-card-btn scan-sled-button" id="scan-btn-card" (touchstart)="scanBtnClicked($event, true)" (touchend)="scanBtnClicked($event, false)">
+      <ion-row class="scan-sled-icon">
+        <ion-col text-center>
+          <ion-icon name="qr-scanner"></ion-icon>
+        </ion-col>
+      </ion-row>
+      <ion-row class="square-card-btn-text">
+        <ion-col text-center>
+          <h1>SCAN</h1>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    </div>
 </ion-content>
+
+<ion-footer class="scan-footer">
+  <ion-toolbar color="p-primary">
+    <ion-title>{{session.room}}</ion-title>
+    <ion-buttons right>
+      <button ion-button icon-only (click)="toggleLockSession()">
+        <ion-icon name='{{sessionLocked ? "ios-lock" : "ios-unlock-outline"}}'></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

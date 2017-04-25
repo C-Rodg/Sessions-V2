@@ -1,3 +1,83 @@
 scan-sled {
-    
+    .content-md {
+        background-color: #e5e5e5;
+    }
+
+    .current-scan-details {
+        .scan-numbers {
+            line-height: 1.2;
+            background-color: color($colors, p-primary);
+            color: color($colors, p-text);
+            border-right: 1px solid color($colors, p-divider);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            .scan-number {
+                font-size: 3.1rem;
+            }
+        }
+        .scan-info {
+            h2 {
+                margin: 0 0 2px 0;
+                font-weight: bold;
+            }
+
+            p {
+                margin: 0;
+                line-height: 1.2;
+            }
+
+            .date, .range-date {
+                color: #666;
+            }
+
+            .time {
+                padding-top: 2px;
+                font-size: 1.6rem;
+            }
+        }
+    }
+
+    .sled-scan-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .scan-sled-button {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+
+        .scan-sled-icon {
+            flex-grow: 1;
+
+            ion-col {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            ion-icon {
+                font-size: 17rem;
+                color: rgba(0,0,0,0.8);
+            }
+        }
+
+        h1 {
+            font-size: 3rem;
+        }
+    }
+
+    .square-card-btn-text {
+        border-top: 1px solid color($colors, white-divider);
+        padding-top: 10px;
+        padding-bottom: 8px;
+    }
+
+    .scan-clicked {
+        background-color: #e6e6e6;
+    }
 }

@@ -5,17 +5,9 @@ import { MoreInfoPopover } from './more-info/more-info';
 import { ScanCameraPage } from '../scan-camera/scan-camera';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 
-import { sessionsArray } from '../../test-data/mock-data';
+import { DisplaySession } from '../../interfaces/display-session';
 
-interface Session {
-  title? : string,
-  room? : string,
-  startDate? : string,
-  rangeDate? : string,
-  startTime? : string,
-  endTime? : string,
-  accessControl? : boolean
-}
+import { sessionsArray } from '../../test-data/mock-data';
 
 @Component({
   selector: 'page-session-detail',
@@ -24,9 +16,9 @@ interface Session {
 export class SessionDetailPage {
 
   orderedSessions: Array<any> = [];  
-  session : Session = {};
-  prevSession: Session = {};
-  nextSession: Session = {};
+  session : DisplaySession = {};
+  prevSession: DisplaySession = {};
+  nextSession: DisplaySession = {};
 
   accessListCount: Number = 84;
   scannedCount: Number = 237;
@@ -74,7 +66,7 @@ export class SessionDetailPage {
     const { Topic, TrackAttendance, Location, StartDateTime, EndDateTime } = serverSess;
     const start = moment(StartDateTime);
     const end = moment(EndDateTime);
-    let session: Session = {
+    let session: DisplaySession = {
       title: Topic,
       room: Location,
       startTime: start.format("h:mm A"),
@@ -108,7 +100,7 @@ export class SessionDetailPage {
 
   // Go to the scan page
   getScanPage() {
-    this.navCtrl.push(ScanCameraPage);
+    this.navCtrl.push(ScanSledPage, this.session);
   }
 
   // Refresh the Access List

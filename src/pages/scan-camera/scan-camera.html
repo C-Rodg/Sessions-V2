@@ -5,10 +5,10 @@
     </button>
     <ion-title>Scan</ion-title>
     <ion-buttons end class="navbar-btns">
-      <button ion-button icon-only>
+      <button ion-button icon-only (click)="toggleLight()">
         <ion-icon name="ios-flash-outline"></ion-icon>
       </button>
-      <button ion-button icon-only>
+      <button ion-button icon-only (click)="toggleCamera()">
         <ion-icon name="reverse-camera"></ion-icon>
       </button>
     </ion-buttons>
@@ -16,5 +16,31 @@
 </ion-header>
 
 <ion-content>
-    Scan Camera
+  <div class="camera-content-container">
+    <ion-card class="current-scan-details" id="target-bottom">
+      <ion-row>
+        <ion-col col-3 text-center class="scan-numbers" stretch>
+          <div class="scan-number">210</div>
+          <div center>scans</div>
+        </ion-col>
+        <ion-col class="scan-info" padding-left>
+          <h2>{{session.title}}</h2>
+          <p class="date">{{session.startDate}}</p>
+          <p class="range-date" *ngIf="session.rangeDate">{{session.rangeDate}}</p>
+          <p class="time">{{session.startTime}} - {{session.endTime}}</p>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+  </div>
 </ion-content>
+
+<ion-footer class="scan-footer">
+  <ion-toolbar color="p-primary">
+    <ion-title>{{session.room}}</ion-title>
+    <ion-buttons right>
+      <button ion-button icon-only (click)="toggleLockSession()">
+        <ion-icon name='{{sessionLocked ? "ios-lock" : "ios-unlock-outline"}}'></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

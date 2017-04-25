@@ -11,7 +11,7 @@ export class ScanCameraService {
         top: 62,
         left: 0,
         width: 320,
-        height: 456  // With search bar, height = 404
+        height: 320
     };
     public torch : string = "OFF";
     private endpoint : string = "http://localhost/barcodecontrol";
@@ -25,38 +25,26 @@ export class ScanCameraService {
         }, false);
     }
 
+    // Calculate position based off of '#target-bottom' element
     calculatePosition() {
         const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-        if (width < 420) {
-            // iTouch portrait mode
-            this.camera.width = width;
-            this.camera.height = 456;
-            if (this.cameraOn) {
-                this.turnOn();
-            }
-        } else if (width < 600) {
-            // iTouch in landscape mode
-            this.camera.width = width;
-            this.camera.height = height - 115;
-            if (this.cameraOn) {
-                this.turnOn();
-            }
-        } else if (width < 800) {
-            // This is iPad in portrait mode
-            this.camera.width = width;
-            this.camera.height = height - 123;
-            if (this.cameraOn) {
-                this.turnOn();
+        const target = document.getElementById('target-bottom');
+        this.camera.width = width;
+        if (target) {
+            const coords = target.getBoundingClientRect();
+            if (coords) {                
+                this.camera.height = coords.bottom - coords.height - 72;
+
+            } else {
+                this.camera.height = 310;
             }
         } else {
-            // This is iPad in landscape mode or bigger...
-            this.camera.width = width;
-            this.camera.height = height - 123;
-            if (this.cameraOn) {
-                this.turnOn();
-            }
-        }
+            this.camera.height = 310;
+        }       
+        
+        if (this.cameraOn) {
+            this.turnOn();
+        }        
     }
 
     turnOn() {

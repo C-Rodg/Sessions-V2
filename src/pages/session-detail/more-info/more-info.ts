@@ -1,16 +1,7 @@
 import { Component } from '@angular/core';
 import { NavParams, LoadingController, ToastController, ViewController } from 'ionic-angular';
 
-
-interface Session {
-  title? : string,
-  room? : string,
-  startDate? : string,
-  rangeDate? : string,
-  startTime? : string,
-  endTime? : string,
-  accessControl? : boolean
-}
+import { DisplaySession } from '../../../interfaces/display-session';
 
 @Component({
   selector: 'more-info-popover',
@@ -18,8 +9,8 @@ interface Session {
 })
 export class MoreInfoPopover {
   pendingCount: Number = 32;
-  prevSession: Session = {};
-  nextSession: Session = {};    
+  prevSession: DisplaySession = {};
+  nextSession: DisplaySession = {};    
 
   constructor(private navParams: NavParams,
       private toastCtrl: ToastController,
@@ -62,16 +53,7 @@ export class MoreInfoPopover {
 
   // Go to prev/next session and remove original session from nav stack
   goToSession(dir) {
-    this.viewCtrl.dismiss(dir);
-    // this.viewCtrl.dismiss().then(() => {
-    //   console.log(this.navCtrl.getActive().index);
-    //   const sess = (dir === 'next') ? this.nextSession : this.prevSession;
-    //   this.navCtrl.push(SessionDetailPage, sess).then(() => {
-    //     const idx = this.navCtrl.getActive().index;
-    //     console.log(idx);
-    //     this.navCtrl.remove(idx - 1);
-    //   });
-    // })    
+    this.viewCtrl.dismiss(dir);  
   }
 
 }

@@ -1,3 +1,48 @@
 scan-camera {
-    
+    .content-md {
+        background-color: #e5e5e5;
+    }
+    .camera-content-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: flex-end;
+    }
+
+    .current-scan-details {
+        .scan-numbers {
+            line-height: 1.2;
+            background-color: color($colors, p-primary);
+            color: color($colors, p-text);
+            border-right: 1px solid color($colors, p-divider);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            .scan-number {
+                font-size: 3.1rem;
+            }
+        }
+        .scan-info {
+            h2 {
+                margin: 0 0 2px 0;
+                font-weight: bold;
+            }
+
+            p {
+                margin: 0;
+                line-height: 1.2;
+            }
+
+            .date, .range-date {
+                color: #666;
+            }
+
+            .time {
+                padding-top: 2px;
+                font-size: 1.6rem;
+            }
+        }
+    }
 }
