@@ -9,6 +9,9 @@ import { SessionDetailPage } from '../pages/session-detail/session-detail';
 import { ScanSledPage } from '../pages/scan-sled/scan-sled';
 import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 
+import { ScanCameraService } from '../providers/scanCameraService';
+import { ScanSledService } from '../providers/scanSledService';
+
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
 import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
 
@@ -45,10 +48,13 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     DeviceModal,
     MoreInfoPopover,
     ScanSledPage,
-    ScanCameraPage
+    ScanCameraPage,
+    
   ],
   providers: [
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    ScanCameraService,
+    ScanSledService
   ]
 })
 export class AppModule {}
