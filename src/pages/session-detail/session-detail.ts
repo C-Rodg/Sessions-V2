@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, PopoverController, LoadingController, ToastController } from 'ionic-angular';
 import * as moment from 'moment';
 import { MoreInfoPopover } from './more-info/more-info';
+import { ScanCameraPage } from '../scan-camera/scan-camera';
+import { ScanSledPage } from '../scan-sled/scan-sled';
 
 import { sessionsArray } from '../../test-data/mock-data';
 
@@ -106,7 +108,7 @@ export class SessionDetailPage {
 
   // Go to the scan page
   getScanPage() {
-
+    this.navCtrl.push(ScanCameraPage);
   }
 
   // Refresh the Access List

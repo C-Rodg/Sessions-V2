@@ -6,6 +6,8 @@ import { MyApp } from './app.component';
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
 import { SessionDetailPage } from '../pages/session-detail/session-detail';
+import { ScanSledPage } from '../pages/scan-sled/scan-sled';
+import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
 import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
@@ -13,9 +15,6 @@ import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
 import { FilterDates } from '../pipes/FilterDates';
 import { FilterRooms } from '../pipes/FilterRooms';
 import { FilterSessionText } from '../pipes/FilterSessionText';
-
-import { StatusBar } from '@ionic-native/status-bar';
-import { SplashScreen } from '@ionic-native/splash-screen';
 
 @NgModule({
   declarations: [
@@ -27,7 +26,9 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     FilterRooms,
     FilterSessionText,
     DeviceModal,
-    MoreInfoPopover
+    MoreInfoPopover,
+    ScanSledPage,
+    ScanCameraPage
   ],
   imports: [
     BrowserModule,
@@ -42,11 +43,11 @@ import { SplashScreen } from '@ionic-native/splash-screen';
     SettingsPage,
     SessionDetailPage,
     DeviceModal,
-    MoreInfoPopover
+    MoreInfoPopover,
+    ScanSledPage,
+    ScanCameraPage
   ],
   providers: [
-    StatusBar,
-    SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
