@@ -100,7 +100,12 @@ export class SessionDetailPage {
 
   // Go to the scan page
   getScanPage() {
-    this.navCtrl.push(ScanSledPage, this.session);
+    // TODO: TESTING go to camera for access control sessions...
+    if (this.session.accessControl) {
+      this.navCtrl.push(ScanCameraPage, this.session);
+    } else {
+      this.navCtrl.push(ScanSledPage, this.session);
+    }    
   }
 
   // Refresh the Access List
