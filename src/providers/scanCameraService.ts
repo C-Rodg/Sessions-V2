@@ -8,10 +8,10 @@ export class ScanCameraService {
     private camera = {
         visible : "YES",
         camera : "BACK",
-        top: 62,
+        top: 70, // 62
         left: 0,
         width: 320,
-        height: 320
+        height: 302
     };
     public torch : string = "OFF";
     private endpoint : string = "http://localhost/barcodecontrol";
@@ -23,7 +23,7 @@ export class ScanCameraService {
         window.addEventListener('orientationchange', () => {
             setTimeout(this.calculatePosition, 700);
         }, false);
-    }
+    }  // 
 
     // Calculate position based off of '#target-bottom' element
     calculatePosition() {
@@ -33,13 +33,13 @@ export class ScanCameraService {
         if (target) {
             const coords = target.getBoundingClientRect();
             if (coords) {                
-                this.camera.height = coords.bottom - coords.height - 72;
+                this.camera.height = coords.bottom - coords.height - 84;
 
             } else {
-                this.camera.height = 310;
+                this.camera.height = 302;
             }
         } else {
-            this.camera.height = 310;
+            this.camera.height = 302;
         }       
         
         if (this.cameraOn) {

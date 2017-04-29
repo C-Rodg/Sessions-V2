@@ -62,13 +62,23 @@ $text-input-md-show-focus-highlight: false;
 
 $loading-md-spinner-color: color($colors, p-primary-dark);
 
-.alert-md .alert-input:focus {
-  border-bottom-color: color($colors, p-primary) !important;
+// .alert-md .alert-input:focus {
+//   border: 0;
+//   border-bottom: 2px solid color($colors, p-primary) !important;
+// }
+
+.alert-md .alert-input {
+  border-radius: 0 !important;
 }
+
+$alert-md-input-border-color-focused: color($colors, p-primary);
+
 
 
 // Global Component Styles
 
+
+// Inline button component 
 .inline-card-button {
   .inline-card-icon {
         border-right: 1px solid color($colors, white-divider);
@@ -93,17 +103,21 @@ $loading-md-spinner-color: color($colors, p-primary-dark);
     }
 }
 
+// Helper - Green border left
 .green-border-left {
   border-left: 3px solid color($colors, p-primary);
   border-width: 3px !important;
 }
 
+
+// Navbar button spacing
 .navbar-btns {
   button {
     margin-right: 12px;
   }
 }
 
+// Confirm entry pop up
 .confirm-entry {
   ion-backdrop {
     background-color: #f50000;
@@ -119,6 +133,7 @@ $loading-md-spinner-color: color($colors, p-primary-dark);
 
 }
 
+// Attendee allowed/denied notifications
 .notify-confirm {
   .toast-wrapper {
     background-color: color($colors, p-success) !important;
@@ -138,6 +153,81 @@ $loading-md-spinner-color: color($colors, p-primary-dark);
   .toast-message {
     padding-top: 25px !important;
     font-size: 2.6rem !important;
+  }
+}
+
+// Custom Password Modal
+.custom-modal {
+    animation: fade-in 0.3s ease-in-out;
+    position: fixed;
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    .custom-modal-wrapper {
+        margin-top: 20%;
+        width: 80%;
+        min-width: 250px;
+        max-width: 280px;
+        max-height: 90%;
+        background-color: #fafafa;
+        box-shadow: 0 16px 20px rgba(0, 0, 0, 0.4);
+
+        .modal-head {
+            padding: 24px 24px 20px 24px;
+            text-align: left;
+
+            h2 {
+                font-size: 22px;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        .modal-msg {
+            max-height: 240px;
+            font-size: 15px;
+            padding: 0 24px 24px 24px;
+            color: rgba(0,0,0,0.5);
+        }
+
+        .modal-input {
+            padding: 0 24px 24px 24px;
+            color: rgba(0,0,0,0.5);
+
+            input {
+                border-bottom: 1px solid #dedede;
+                color: #000;
+                margin: 5px 0 5px 0;
+                padding: 10px 0;
+            }
+
+            input:focus {
+                border-bottom: 2px solid color($colors, p-primary);
+            }
+        }
+
+        .modal-actions {
+            padding: 8px 8px 8px 24px;
+            display: flex;
+            justify-content: flex-end;
+            flex-direction: row;
+        }
+    }
+}
+
+// Fade In Keyframe
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 

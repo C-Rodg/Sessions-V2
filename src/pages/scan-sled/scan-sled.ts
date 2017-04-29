@@ -11,14 +11,16 @@ import { DisplaySession } from '../../interfaces/display-session';
 export class ScanSledPage {
     session: DisplaySession = {};
     sessionLocked: boolean = false;
+
+    password: string = "";
+    openPassword: boolean = false;
     
     constructor(private params: NavParams,
         private scanSledService: ScanSledService,
         private zone: NgZone,
         private alertCtrl: AlertController,
         private toastCtrl: ToastController
-    ) {
-        
+    ) {       
     }
 
     // Get session data
@@ -101,7 +103,7 @@ export class ScanSledPage {
     // Present a denied toast notification
     alertDenied() {
       let toast = this.toastCtrl.create({
-        message: "Attendee denied access",
+        message: "Attendee denied access.",
         duration: 1000,
         position: 'top',
         cssClass: 'notify-cancel'
@@ -129,36 +131,27 @@ export class ScanSledPage {
       return false;
     }
 
-    // Toggle Locking of session
-    toggleLockSession() {
+    // Toggle lock/unlock of sessions
+    openPasswordModal() {
       if (this.sessionLocked) {
-        let prompt = this.alertCtrl.create({
-          title: 'Session Locked',
-          message: 'Please enter the password to unlock this session...',
-          inputs: [{
-            name: 'password',
-            placeholder: 'Password'
-          }],
-          buttons: [
-            {
-              text: 'Cancel',
-              handler: data => {
-                // Do nothing...
-              }
-            },
-            {
-              text: 'Unlock',
-              handler: data => {
-                if (data.password === '9151') {
-                  this.sessionLocked = false;
-                }
-              }
-            }
-          ]
-        });
-        prompt.present();
+        this.password = "";
+        this.openPassword = true;
       } else {
-        this.sessionLocked = !this.sessionLocked;
-      }      
+        this.sessionLocked = true;
+      }
+    }
+
+    // Cancel button on password modal clicked
+    cancelPassword() {
+      this.openPassword = false;
+      this.password = '';
+    }
+
+    // Unlock button on password modal clicked
+    unlockSession() {
+      if (this.password === '9151') {
+        this.openPassword = false;
+        this.sessionLocked = false;
+      }
     }
 }

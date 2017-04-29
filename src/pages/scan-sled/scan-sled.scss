@@ -3,6 +3,13 @@ scan-sled {
         background-color: #e5e5e5;
     }
 
+    .scan__nav__title {
+        ion-icon {
+            margin-right: 8px;
+            font-size: 2rem;
+        }
+    }
+
     .current-scan-details {
         .scan-numbers {
             line-height: 1.2;
@@ -80,4 +87,5 @@ scan-sled {
     .scan-clicked {
         background-color: #e6e6e6;
     }
+    
 }

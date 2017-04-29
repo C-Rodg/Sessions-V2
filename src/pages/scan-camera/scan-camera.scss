@@ -2,6 +2,14 @@ scan-camera {
     .content-md {
         background-color: #e5e5e5;
     }
+
+    .scan__nav__title {
+        ion-icon {
+            margin-right: 8px;
+            font-size: 2rem;
+        }
+    }
+
     .camera-content-container {
         display: flex;
         flex-direction: column;

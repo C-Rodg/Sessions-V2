@@ -39,6 +39,7 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     HttpModule,
     IonicModule.forRoot(MyApp, {
       mode: 'md'
+      //,alertEnter: 'alert-wp-pop-in'
     }),
   ],
   bootstrap: [IonicApp],
