@@ -3,6 +3,7 @@ import { NavParams, AlertController, ToastController } from 'ionic-angular';
 
 import { ScanSledService } from '../../providers/scanSledService';
 import { DisplaySession } from '../../interfaces/display-session';
+import { SoundService } from '../../providers/soundService';
 
 @Component({
   selector: 'scan-sled',
@@ -17,6 +18,7 @@ export class ScanSledPage {
     
     constructor(private params: NavParams,
         private scanSledService: ScanSledService,
+        private soundService: SoundService,
         private zone: NgZone,
         private alertCtrl: AlertController,
         private toastCtrl: ToastController
@@ -58,6 +60,7 @@ export class ScanSledPage {
       this.zone.run(() => {
         this.removeScanClickClass();
         if (allowed) {
+          this.soundService.playAccepted();
           this.alertAllowed();
         } else {
           let confirm = this.alertCtrl.create({
@@ -71,6 +74,7 @@ export class ScanSledPage {
                 cssClass: 'confirm-cancel',                
                 handler: () => {
                   // Don't allow
+                  this.soundService.playDenied();
                   this.alertDenied();
                 }
               },
@@ -79,6 +83,7 @@ export class ScanSledPage {
                 cssClass: 'confirm-allow',
                 handler: () => {
                   // Allow attendee
+                  this.soundService.playAccepted();
                   this.alertAllowed();
                 }
               }

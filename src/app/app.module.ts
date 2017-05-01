@@ -12,6 +12,7 @@ import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 
 import { ScanCameraService } from '../providers/scanCameraService';
 import { ScanSledService } from '../providers/scanSledService';
+import { SoundService } from '../providers/soundService';
 
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
 import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
@@ -57,7 +58,8 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     ScanCameraService,
-    ScanSledService
+    ScanSledService,
+    SoundService
   ]
 })
 export class AppModule {}

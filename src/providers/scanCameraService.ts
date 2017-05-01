@@ -17,7 +17,8 @@ export class ScanCameraService {
     private endpoint : string = "http://localhost/barcodecontrol";
     private cameraOn: boolean = false;
 
-    constructor(private http: Http) {
+    constructor(private http: Http
+    ) {
         this.calculatePosition = this.calculatePosition.bind(this);
         this.calculatePosition();
         window.addEventListener('orientationchange', () => {

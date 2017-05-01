@@ -2,6 +2,7 @@ import { Component, NgZone } from '@angular/core';
 import { NavParams, AlertController, ToastController } from 'ionic-angular';
 
 import { ScanCameraService } from '../../providers/scanCameraService';
+import { SoundService } from '../../providers/soundService';
 import { DisplaySession } from '../../interfaces/display-session';
 
 @Component({
@@ -19,7 +20,8 @@ export class ScanCameraPage {
       private zone: NgZone,
       private params: NavParams,
       private alertCtrl: AlertController,
-      private toastCtrl: ToastController
+      private toastCtrl: ToastController,
+      private soundService: SoundService
     ) {
         
     }
@@ -62,6 +64,7 @@ export class ScanCameraPage {
       const scannedDate = data;
       this.zone.run(() => {        
         if (allowed) {
+          this.soundService.playAccepted();
           this.alertAllowed();
         } else {
           this.scanCameraService.turnOff();
@@ -76,6 +79,7 @@ export class ScanCameraPage {
                 cssClass: 'confirm-cancel',                
                 handler: () => {
                   // Don't allow
+                  this.soundService.playDenied();
                   this.scanCameraService.turnOn();
                   this.alertDenied();
                 }
@@ -85,6 +89,7 @@ export class ScanCameraPage {
                 cssClass: 'confirm-allow',
                 handler: () => {
                   // Allow attendee
+                  this.soundService.playAccepted();
                   this.scanCameraService.turnOn();
                   this.alertAllowed();
                 }

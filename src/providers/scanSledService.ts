@@ -6,7 +6,8 @@ import 'rxjs/add/operator/map';
 export class ScanSledService {
     private endpoint : string = "http://localhost/linea/";
     
-    constructor(private http: Http) {
+    constructor(private http: Http
+    ) {
 
     }
 
