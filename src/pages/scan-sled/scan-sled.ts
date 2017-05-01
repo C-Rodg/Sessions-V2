@@ -146,17 +146,14 @@ export class ScanSledPage {
       }
     }
 
-    // Cancel button on password modal clicked
-    cancelPassword() {
-      this.openPassword = false;
-      this.password = '';
+    // Password Prompt - Cancel Event Handler
+    promptCancelled() {
+      this.openPassword = false;      
     }
 
-    // Unlock button on password modal clicked
-    unlockSession() {
-      if (this.password === '9151') {
-        this.openPassword = false;
-        this.sessionLocked = false;
-      }
+    // Password Prompt - Unlock Event Handler
+    promptUnlocked() {
+      this.openPassword = false;
+      this.sessionLocked = false;      
     }
 }

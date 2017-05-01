@@ -1,6 +1,13 @@
 scan-camera {
+
     .content-md {
         background-color: #e5e5e5;
+    }
+
+    #camera-target {
+        margin-bottom: 10px;
+        width: 100%;
+        flex-grow: 1;
     }
 
     .scan__nav__title {
@@ -14,7 +21,6 @@ scan-camera {
         display: flex;
         flex-direction: column;
         height: 100%;
-        justify-content: flex-end;
     }
 
     .current-scan-details {

@@ -31,7 +31,9 @@
         </ion-col>
       </ion-row>
     </ion-card>
-  </div>
+    
+    <div id="camera-target"></div>
+  </div>  
 </ion-content>
 
 <ion-footer class="scan-footer">
@@ -45,20 +47,4 @@
   </ion-toolbar>
 </ion-footer>
 
-<div class="custom-modal" *ngIf="openPassword">
-    <div class="custom-modal-wrapper">
-      <div class="modal-head">
-        <h2>Session Locked</h2>
-      </div>
-      <div class="modal-msg">
-        Please enter the password to unlock this session...
-      </div>
-      <div class="modal-input">
-          <ion-input type="password" placeholder="Password" [(ngModel)]="password"></ion-input>
-      </div>
-      <div class="modal-actions">
-        <button ion-button clear color="p-primary" (click)="cancelPassword()">Cancel</button>
-        <button ion-button clear color="p-primary" (click)="unlockSession()">Unlock</button>
-      </div>
-    </div>
-</div>
+<password-prompt *ngIf="openPassword" (promptCancel)="promptCancelled()" (promptUnlock)="promptUnlocked()"></password-prompt>

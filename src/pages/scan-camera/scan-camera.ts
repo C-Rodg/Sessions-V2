@@ -13,7 +13,6 @@ export class ScanCameraPage {
     sessionLocked: boolean = false;
     session: DisplaySession = {};
 
-    password: string = "";
     openPassword: boolean = false;
 
     constructor(private scanCameraService: ScanCameraService,
@@ -109,67 +108,28 @@ export class ScanCameraPage {
     // Turn Front/Back camera
     toggleCamera() {
       this.scanCameraService.toggleCamera();
+    }    
+
+    // Password Prompt - Cancel Event Handler
+    promptCancelled() {
+      this.scanCameraService.turnOn();
+      this.openPassword = false;      
     }
 
-    // Toggle lock session
-    toggleLockSession() {
-      if (this.sessionLocked) {        
-        let prompt = this.alertCtrl.create({
-          title: 'Session Locked',
-          message: 'Please enter the password to unlock this session...',
-          inputs: [{
-            name: 'password',
-            placeholder: 'Password'
-          }],
-          buttons: [
-            {
-              text: 'Cancel',
-              handler: data => {
-                this.scanCameraService.turnOn();
-              }
-            },
-            {
-              text: 'Unlock',
-              handler: data => {
-                if (data.password === '9151') {
-                  this.scanCameraService.turnOn();
-                  this.sessionLocked = false;
-                }
-              }
-            }
-          ]
-        });
-        this.scanCameraService.turnOff();
-        prompt.present();        
-      } else {
-        this.sessionLocked = true;
-      }      
+    // Password Prompt - Unlock Event Handler
+    promptUnlocked() {
+      this.scanCameraService.turnOn();
+      this.openPassword = false;
+      this.sessionLocked = false;      
     }
 
     // Toggle lock/unlock of sessions
     openPasswordModal() {
       if (this.sessionLocked) {
-        this.scanCameraService.turnOff();
-        this.password = "";
+        this.scanCameraService.turnOff();        
         this.openPassword = true;
       } else {
         this.sessionLocked = true;
-      }
-    }
-
-    // Cancel button on password modal clicked
-    cancelPassword() {
-      this.scanCameraService.turnOn();
-      this.openPassword = false;
-      this.password = '';
-    }
-
-    // Unlock button on password modal clicked
-    unlockSession() {
-      if (this.password === '9151') {
-        this.scanCameraService.turnOn();
-        this.openPassword = false;
-        this.sessionLocked = false;
       }
     }
 

@@ -9,6 +9,7 @@ import { SettingsPage } from '../pages/settings/settings';
 import { SessionDetailPage } from '../pages/session-detail/session-detail';
 import { ScanSledPage } from '../pages/scan-sled/scan-sled';
 import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
+import { PasswordPrompt } from '../pages/password-prompt/password-prompt';
 
 import { ScanCameraService } from '../providers/scanCameraService';
 import { ScanSledService } from '../providers/scanSledService';
@@ -33,7 +34,8 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     DeviceModal,
     MoreInfoPopover,
     ScanSledPage,
-    ScanCameraPage
+    ScanCameraPage,
+    PasswordPrompt
   ],
   imports: [
     BrowserModule,
