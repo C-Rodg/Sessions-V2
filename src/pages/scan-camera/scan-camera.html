@@ -48,3 +48,5 @@
 </ion-footer>
 
 <password-prompt *ngIf="openPassword" (promptCancel)="promptCancelled()" (promptUnlock)="promptUnlocked()"></password-prompt>
+<div class="backdrop-flash accepted" [hidden]="!showAcceptedBackground"></div>
+<div class="backdrop-flash denied" [hidden]="!showDeniedBackground"></div>

@@ -5,6 +5,8 @@ import { ScanSledService } from '../../providers/scanSledService';
 import { DisplaySession } from '../../interfaces/display-session';
 import { SoundService } from '../../providers/soundService';
 
+const notificationTime = 1000;
+
 @Component({
   selector: 'scan-sled',
   templateUrl: 'scan-sled.html'
@@ -13,7 +15,8 @@ export class ScanSledPage {
     session: DisplaySession = {};
     sessionLocked: boolean = false;
 
-    password: string = "";
+    showAcceptedBackground: boolean = false;
+    showDeniedBackground: boolean = false;
     openPassword: boolean = false;
     
     constructor(private params: NavParams,
@@ -52,16 +55,22 @@ export class ScanSledPage {
 
     // Zone function that parses badge data
     onZoneDataRead(data) {
-      // TESTING
+      // TESTING - show the 3 paths - accepted, denied, denied with prompt
       const allowed = Math.round(Math.random());
+      const secondCheck = Math.round(Math.random());
 
       const scannedData = data;
       //alert(JSON.stringify(data));
       this.zone.run(() => {
         this.removeScanClickClass();
         if (allowed) {
-          this.soundService.playAccepted();
-          this.alertAllowed();
+          if (secondCheck) {
+             this.soundService.playAccepted();
+            this.alertAllowed();
+          } else {
+            this.soundService.playDenied();
+            this.alertDenied();
+          }         
         } else {
           let confirm = this.alertCtrl.create({
             title: 'Not on access list',
@@ -98,22 +107,30 @@ export class ScanSledPage {
     alertAllowed() {
       let toast = this.toastCtrl.create({
         message: "Successfully allowed in!",
-        duration: 1000,
+        duration: notificationTime,
         position: 'top',
         cssClass: 'notify-confirm'
       });
+      this.showAcceptedBackground = true;
       toast.present();
+      setTimeout(function() {
+        this.showAcceptedBackground = false;
+      }.bind(this), notificationTime);
     }
 
     // Present a denied toast notification
     alertDenied() {
       let toast = this.toastCtrl.create({
         message: "Attendee denied access.",
-        duration: 1000,
+        duration: notificationTime,
         position: 'top',
         cssClass: 'notify-cancel'
       });
+      this.showDeniedBackground = true;
       toast.present();
+      setTimeout(function() {
+        this.showDeniedBackground = false;
+      }.bind(this), notificationTime);
     }
 
     // Add css class for scan button
@@ -139,7 +156,6 @@ export class ScanSledPage {
     // Toggle lock/unlock of sessions
     openPasswordModal() {
       if (this.sessionLocked) {
-        this.password = "";
         this.openPassword = true;
       } else {
         this.sessionLocked = true;

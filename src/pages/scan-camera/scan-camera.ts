@@ -5,6 +5,8 @@ import { ScanCameraService } from '../../providers/scanCameraService';
 import { SoundService } from '../../providers/soundService';
 import { DisplaySession } from '../../interfaces/display-session';
 
+const notificationTime = 1000;
+
 @Component({
   selector: 'scan-camera',
   templateUrl: 'scan-camera.html'
@@ -14,6 +16,8 @@ export class ScanCameraPage {
     session: DisplaySession = {};
 
     openPassword: boolean = false;
+    showAcceptedBackground: boolean = false;
+    showDeniedBackground: boolean = false;
 
     constructor(private scanCameraService: ScanCameraService,
       private zone: NgZone,
@@ -57,14 +61,20 @@ export class ScanCameraPage {
     // Zone function that runs window.OnDataRead
     onZoneDataRead(data) {
       
-       // TESTING
+       // TESTING to show 3 different routes - accepted, denied, denied with prompt...
       const allowed = Math.round(Math.random());
+      const secondCheck = Math.round(Math.random());
 
       const scannedDate = data;
       this.zone.run(() => {        
         if (allowed) {
-          this.soundService.playAccepted();
-          this.alertAllowed();
+          if (secondCheck) {
+            this.soundService.playAccepted();
+            this.alertAllowed();
+          } else {
+            this.soundService.playDenied();
+            this.alertDenied();
+          }          
         } else {
           this.scanCameraService.turnOff();
           let confirm = this.alertCtrl.create({
@@ -137,21 +147,30 @@ export class ScanCameraPage {
     alertAllowed() {
       let toast = this.toastCtrl.create({
         message: "Successfully allowed in!",
-        duration: 1000,
+        duration: notificationTime,
         position: 'top',
         cssClass: 'notify-confirm'
       });
+      this.showAcceptedBackground = true;
       toast.present();
+      setTimeout(function() {
+        this.showAcceptedBackground = false;
+      }.bind(this), notificationTime);
     }
 
     // Present a denied toast notification
-    alertDenied() {
+    alertDenied() {      
       let toast = this.toastCtrl.create({
         message: "Attendee denied access.",
-        duration: 1000,
+        duration: notificationTime,
         position: 'top',
         cssClass: 'notify-cancel'
       });
+      this.showDeniedBackground = true;
       toast.present();
+
+      setTimeout(function() {
+        this.showDeniedBackground = false;
+      }.bind(this), notificationTime);
     }
 }
