@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav,  LoadingController, ToastController } from 'ionic-angular';
+import { Nav,  LoadingController, ToastController, MenuController } from 'ionic-angular';
 
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
@@ -17,9 +17,9 @@ export class MyApp {
 
   constructor(
         private loadingCtrl: LoadingController,
-        private toastCtrl: ToastController   
+        private toastCtrl: ToastController,
+        private menuCtrl: MenuController
   ) {
-    this.initializeApp();
 
     // Create side menu
     this.pages = [     
@@ -29,11 +29,6 @@ export class MyApp {
       { title: 'Settings', component: SettingsPage, icon: 'settings'},
       { title: 'Exit', component: '', icon: 'exit'}
     ];
-
-  }
-
-  // Handle initialization of app
-  initializeApp() {    
 
   }
 
