@@ -40,6 +40,9 @@
   <ion-toolbar color="p-primary">
     <ion-title>{{session.room}}</ion-title>
     <ion-buttons right>
+      <button ion-button icon-only (click)="refreshAccessList()" *ngIf="session.accessControl" class="m-r-10">
+        <ion-icon name='refresh'></ion-icon>
+      </button>
       <button ion-button icon-only (click)="openPasswordModal()">
         <ion-icon name='{{sessionLocked ? "ios-lock" : "ios-unlock-outline"}}'></ion-icon>
       </button>

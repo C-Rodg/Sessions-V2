@@ -6,6 +6,7 @@ import { ScanCameraPage } from '../scan-camera/scan-camera';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 
 import { DisplaySession } from '../../interfaces/display-session';
+import { InformationService } from '../../providers/informationService';
 
 import { sessionsArray } from '../../test-data/mock-data';
 
@@ -30,11 +31,14 @@ export class SessionDetailPage {
       private params: NavParams,
       private popoverCtrl: PopoverController,
       private toastCtrl: ToastController,
-      private loadingCtrl: LoadingController
+      private loadingCtrl: LoadingController,
+      private infoService: InformationService
   ) {  }
 
-  // Parse out Session details
-  ngOnInit() {
+
+
+  // Convert session to display, determine the Previous and Next Sessions
+  ionViewWillEnter() {
     const d = this.params.data;
     if (d) {
       // If navParam is already in view format do nothing, else convert..
@@ -44,11 +48,10 @@ export class SessionDetailPage {
         this.session = this.convertServerSessionToDisplay(d);
       }               
     }
+    
     // TODO: Get Upload Counts..
-  }  
 
-  // Determine the Previous and Next Sessions
-  ionViewWillEnter() {
+    // Determine prev/next sessions
     this.orderedSessions = this.orderSessions(sessionsArray, this.session.room);
     const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, this.session.title);
     if (currentSessionIndex > -1) {
@@ -100,12 +103,15 @@ export class SessionDetailPage {
 
   // Go to the scan page
   getScanPage() {
-    // TODO: TESTING go to camera for access control sessions...
-    if (this.session.accessControl) {
+    this.infoService.getClientInfo().subscribe((data) => {
+      if (this.infoService.getLineaStatus()) {
+        this.navCtrl.push(ScanSledPage, this.session);
+      } else {
+        this.navCtrl.push(ScanCameraPage, this.session);
+      }
+    }, (err) => {
       this.navCtrl.push(ScanCameraPage, this.session);
-    } else {
-      this.navCtrl.push(ScanSledPage, this.session);
-    }    
+    });
   }
 
   // Refresh the Access List

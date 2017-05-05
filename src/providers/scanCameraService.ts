@@ -8,7 +8,7 @@ export class ScanCameraService {
     private camera = {
         visible : "YES",
         camera : "BACK",
-        top: 200, 
+        top: 220, 
         left: 0,
         width: 320,
         height: 300
@@ -34,14 +34,14 @@ export class ScanCameraService {
         if (target) {
             const coords = target.getBoundingClientRect();
             if (coords) {    
-                this.camera.top = coords.top;
+                this.camera.top = coords.top + 20;
                 this.camera.height = coords.height;                         
             } else {
-                this.camera.top = 200;
+                this.camera.top = 220;
                 this.camera.height = 300;
             }
         } else {
-            this.camera.top = 200;
+            this.camera.top = 220;
             this.camera.height = 300;
         }       
         

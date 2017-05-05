@@ -1,5 +1,5 @@
 import { Component, NgZone } from '@angular/core';
-import { NavParams, AlertController, ToastController } from 'ionic-angular';
+import { NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
 
 import { ScanSledService } from '../../providers/scanSledService';
 import { DisplaySession } from '../../interfaces/display-session';
@@ -24,16 +24,10 @@ export class ScanSledPage {
         private soundService: SoundService,
         private zone: NgZone,
         private alertCtrl: AlertController,
-        private toastCtrl: ToastController
-    ) {       
-    }
-
-    // Get session data
-    ngOnInit() {
-      const d = this.params.data;
-      if (d) {
-        this.session = d;               
-      }      
+        private toastCtrl: ToastController,
+        private loadingCtrl: LoadingController
+    ) {     
+      this.session = this.params.data;  
     }
 
     // Bind OnDataRead to this class, enable scan button
@@ -42,16 +36,12 @@ export class ScanSledPage {
       this.scanSledService.sendScanCommand('enableButtonScan');
     }
 
-    // Disable button scan on leaving
+    // Disable button scan on leaving, disable OnDataRead function
     ionViewWillLeave() {
       this.removeScanClickClass();
       this.scanSledService.sendScanCommand('disableButtonScan');
-    }
-
-    // Remove scanning function
-    ionViewDidLeave() {
       (<any>window).OnDataRead = function(){};
-    }    
+    }  
 
     // Zone function that parses badge data
     onZoneDataRead(data) {
@@ -72,17 +62,19 @@ export class ScanSledPage {
             this.alertDenied();
           }         
         } else {
+          this.scanSledService.sendScanCommand('disableButtonScan');
           let confirm = this.alertCtrl.create({
             title: 'Not on access list',
             message: "Allow this attendee into session?",
             cssClass: 'confirm-entry',
             buttons: [
               {
-                text: "Cancel",
+                text: "Deny",
                 role: 'cancel',
                 cssClass: 'confirm-cancel',                
                 handler: () => {
                   // Don't allow
+                  this.scanSledService.sendScanCommand('enableButtonScan');
                   this.soundService.playDenied();
                   this.alertDenied();
                 }
@@ -92,6 +84,7 @@ export class ScanSledPage {
                 cssClass: 'confirm-allow',
                 handler: () => {
                   // Allow attendee
+                  this.scanSledService.sendScanCommand('enableButtonScan');
                   this.soundService.playAccepted();
                   this.alertAllowed();
                 }
@@ -135,6 +128,7 @@ export class ScanSledPage {
 
     // Add css class for scan button
     scanBtnClicked(event, status) {
+      event.preventDefault();
       if (status) {
         event.currentTarget.classList.add('scan-clicked');
         this.scanSledService.sendScanCommand('startScan');
@@ -171,5 +165,24 @@ export class ScanSledPage {
     promptUnlocked() {
       this.openPassword = false;
       this.sessionLocked = false;      
+    }
+
+    // Click Handler - Refresh access list
+    refreshAccessList() {
+      let loader = this.loadingCtrl.create({
+        content: 'Refreshing access list...',
+        dismissOnPageChange: true
+      });    
+      loader.present();
+      // TODO: Faking refresh time
+      setTimeout(() => {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: "Access lists refreshed!",
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+      }, 3000);
     }
 }

@@ -14,6 +14,7 @@ import { PasswordPrompt } from '../pages/password-prompt/password-prompt';
 import { ScanCameraService } from '../providers/scanCameraService';
 import { ScanSledService } from '../providers/scanSledService';
 import { SoundService } from '../providers/soundService';
+import { InformationService } from '../providers/informationService';
 
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
 import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
@@ -61,7 +62,8 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     ScanCameraService,
     ScanSledService,
-    SoundService
+    SoundService,
+    InformationService
   ]
 })
 export class AppModule {}

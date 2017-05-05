@@ -1,31 +1,59 @@
 import { Component } from '@angular/core';
-import { NavController, ToastController, LoadingController, ModalController } from 'ionic-angular';
+import { NavController, ToastController, LoadingController, ModalController, Events } from 'ionic-angular';
+
 import { DeviceModal } from './device-modal/device-modal';
+import { InformationService } from '../../providers/informationService';
 
 @Component({
   selector: 'page-settings',
   templateUrl: 'settings.html'
 })
 export class SettingsPage {
+
+  aboutDevice : any = {
+    appInfo : "",
+    deviceInfo: "",
+    scannerStatus: "disconnected", 
+    cameraFront: "checkmark",
+    cameraBack: "checkmark"
+  };
   
   deviceName: string = "iTouch 084";
   pendingUploads: Number = 18;
   backgroundUploadWait: Number = 4;
   accessControl: Boolean = true;
   accessControlOverride: Boolean = true;
-  capacityCheck: Boolean = false;
-  appInfo: string = "AVE-Sessions version 2.0.0";
-  deviceInfo: string = "iPod touch running iOS 10.2.1";
-  scannerStatus: string = "connected";
-  cameraFront: string = "checkmark";
-  cameraBack: string = "close";
+  capacityCheck: Boolean = false; 
 
   constructor(public navCtrl: NavController,
       private toastCtrl: ToastController,
       private loadingCtrl: LoadingController,
-      private modalCtrl: ModalController
+      private modalCtrl: ModalController,
+      private infoService: InformationService,
+      private events: Events
   ) {
+    this.buildAboutSection = this.buildAboutSection.bind(this);
+  }
 
+  // Check client and create about section on enter
+  ionViewWillEnter() {
+    this.infoService.getClientInfo().subscribe(this.buildAboutSection);
+    this.events.subscribe('event:onLineaConnect', this.buildAboutSection);
+  }
+
+  // Unsubscribe from events
+  ionViewWillLeave() {
+    this.events.unsubscribe('event:onLineaConnect', this.buildAboutSection);
+  }
+
+  // Build About Section strings
+  buildAboutSection() {
+    const a = this.aboutDevice;
+    a.appInfo = this.infoService.getAppVersion();
+    a.deviceInfo = this.infoService.getDeviceInfo();
+    a.scannerStatus = (this.infoService.getLineaStatus()) ? 'connected' : 'disconnected';
+    a.cameraFront = (this.infoService.getCameraStatus('FrontCamera')) ? 'checkmark' : 'close';
+    a.cameraBack = (this.infoService.getCameraStatus('RearCamera')) ? 'checkmark' : 'close';
   }
 
   // Click handler - leave app

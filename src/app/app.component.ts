@@ -1,8 +1,11 @@
-import { Component, ViewChild } from '@angular/core';
-import { Nav,  LoadingController, ToastController, MenuController } from 'ionic-angular';
+import { Component, ViewChild, NgZone } from '@angular/core';
+import { Nav,  LoadingController, ToastController, AlertController, MenuController, Events } from 'ionic-angular';
 
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
+import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
+
+import { InformationService } from '../providers/informationService';
 
 @Component({
   templateUrl: 'app.html'
@@ -18,7 +21,11 @@ export class MyApp {
   constructor(
         private loadingCtrl: LoadingController,
         private toastCtrl: ToastController,
-        private menuCtrl: MenuController
+        private menuCtrl: MenuController,
+        private alertCtrl: AlertController,
+        private events: Events,
+        private zone: NgZone,
+        private infoService: InformationService
   ) {
 
     // Create side menu
@@ -30,6 +37,29 @@ export class MyApp {
       { title: 'Exit', component: '', icon: 'exit'}
     ];
 
+    this.infoService.startUpApplication().subscribe((data) => {
+      //alert(JSON.stringify(data));
+    }, (err) => {
+      //alert(JSON.stringify(err));
+    });
+
+    (<any>window).OnLineaConnect = this.onZoneOnAppActive.bind(this);
+  }
+
+  // Handle OnLineaConnect function call depending on the current page
+  onZoneOnAppActive() {
+    this.zone.run(() => {
+      this.infoService.getClientInfo().subscribe((data) => {
+        let view = this.nav.getActive();
+        if (view.instance instanceof ScanCameraPage) {
+          this.events.publish('event:onLineaConnect');
+        } else if (view.instance instanceof SettingsPage) {
+          this.events.publish('event:onLineaConnect');
+        }
+      }, (err) => {
+
+      });
+    })
   }
 
   // Click handler for side menu

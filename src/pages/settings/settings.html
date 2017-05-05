@@ -101,10 +101,10 @@
         </ion-col>
         <ion-col center padding-left>
           <h1>About</h1>
-          <p class="secondary-text">{{appInfo}}</p>
-          <p class="secondary-text">{{deviceInfo}}</p>
-          <p class="secondary-text">Sled-scanner: {{scannerStatus}}</p>
-          <p class="secondary-text">Cameras: front <ion-icon name="{{'ios-' + cameraFront }}"></ion-icon> | back <ion-icon name="{{'ios-' + cameraBack }}"></ion-icon></p>
+          <p class="secondary-text">{{aboutDevice.appInfo}}</p>
+          <p class="secondary-text">{{aboutDevice.deviceInfo}}</p>
+          <p class="secondary-text">Sled-scanner: {{aboutDevice.scannerStatus}}</p>
+          <p class="secondary-text">Cameras: front <ion-icon name="{{'ios-' + aboutDevice.cameraFront }}"></ion-icon> | back <ion-icon name="{{'ios-' + aboutDevice.cameraBack }}"></ion-icon></p>
         </ion-col>
       </ion-row>
     </ion-card>

@@ -1,9 +1,10 @@
 import { Component, NgZone } from '@angular/core';
-import { NavParams, AlertController, ToastController } from 'ionic-angular';
+import { NavController, NavParams, AlertController, ToastController, LoadingController, Events } from 'ionic-angular';
 
 import { ScanCameraService } from '../../providers/scanCameraService';
 import { SoundService } from '../../providers/soundService';
 import { DisplaySession } from '../../interfaces/display-session';
+import { ScanSledPage } from '../scan-sled/scan-sled';
 
 const notificationTime = 1000;
 
@@ -12,6 +13,8 @@ const notificationTime = 1000;
   templateUrl: 'scan-camera.html'
 })
 export class ScanCameraPage {
+
+    leaveCameraMsg: boolean = false;
     sessionLocked: boolean = false;
     session: DisplaySession = {};
 
@@ -22,24 +25,21 @@ export class ScanCameraPage {
     constructor(private scanCameraService: ScanCameraService,
       private zone: NgZone,
       private params: NavParams,
+      private events: Events,
       private alertCtrl: AlertController,
       private toastCtrl: ToastController,
-      private soundService: SoundService
+      private soundService: SoundService,
+      private loadingCtrl: LoadingController,
+      private navCtrl: NavController
     ) {
-        
+        this.session = this.params.data;
+        this.onLineaConnect = this.onLineaConnect.bind(this);
     }
 
-    // Get session data
-    ngOnInit() {
-      const d = this.params.data;
-      if (d) {
-        this.session = d;
-      }      
-    }
-
-    // Set OnDataRead function and turn on camera
+    // Set OnDataRead function and subscribe to onLineaConnect event
     ionViewWillEnter() {
-      (<any>window).OnDataRead = this.onZoneDataRead.bind(this);      
+      (<any>window).OnDataRead = this.onZoneDataRead.bind(this); 
+      this.events.subscribe('event:onLineaConnect', this.onLineaConnect);  
     }
 
     // Calculate position and then turn on camera
@@ -48,14 +48,43 @@ export class ScanCameraPage {
       this.scanCameraService.turnOn();
     }
 
-    // Shut off camera on leaving
+    // Shut off camera on leaving, disallow scanning, unsubscribe from events
     ionViewWillLeave() {    
       this.scanCameraService.turnOff();
+      (<any>window).OnDataRead = function(){};
+      this.events.unsubscribe('event:onLineaConnect', this.onLineaConnect);
     }
 
-    // Disallow scanning on other pages
-    ionViewDidLeave() {
-      (<any>window).OnDataRead = function(){};
+    // Check if user wants to leave camera page
+    onLineaConnect() {
+      if (!this.leaveCameraMsg) {
+        this.leaveCameraMsg = true;
+        this.scanCameraService.turnOff();
+        let msg = this.alertCtrl.create({
+          title: "Sled scanner detected",
+          message: "Do you want to leave the camera scanning page?",
+          buttons: [
+            {
+              text: 'Stay',
+              handler: () => {
+                this.leaveCameraMsg = false;
+                this.scanCameraService.turnOn();
+              }
+            },
+            {
+              text: "Leave", 
+              handler: () => {
+                this.leaveCameraMsg = false;
+                this.navCtrl.push(ScanSledPage, this.session).then(() => {
+                  const idx = this.navCtrl.getActive().index;
+                  this.navCtrl.remove(idx - 1);
+                });
+              }
+            }
+          ]
+        });
+        msg.present(); 
+      }
     }
 
     // Zone function that runs window.OnDataRead
@@ -83,7 +112,7 @@ export class ScanCameraPage {
             cssClass: 'confirm-entry',
             buttons: [
               {
-                text: "Cancel",
+                text: "Deny",
                 role: 'cancel',
                 cssClass: 'confirm-cancel',                
                 handler: () => {
@@ -172,5 +201,26 @@ export class ScanCameraPage {
       setTimeout(function() {
         this.showDeniedBackground = false;
       }.bind(this), notificationTime);
+    }
+
+    // Click Handler - Refresh Access List
+    refreshAccessList() {
+      this.scanCameraService.turnOff();
+      let loader = this.loadingCtrl.create({
+        content: 'Refreshing access list...',
+        dismissOnPageChange: true
+      });    
+      loader.present();
+      // TODO: Faking refresh time
+      setTimeout(() => {
+        loader.dismiss();
+        this.scanCameraService.turnOn();
+        let toast = this.toastCtrl.create({
+          message: "Access lists refreshed!",
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+      }, 3000);
     }
 }
