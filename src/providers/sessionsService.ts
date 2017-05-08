@@ -52,12 +52,83 @@ export class SessionsService {
 
     updateCounts() {
         // TODO: update totalscans, pending, errors, currentSession.pending, currentSession.errors
+        
     }
 
 
     //////////////////////////////////
     //  Sessions Services 
     //////////////////////////////////
+
+    fetchSessions() {
+        let headers = new Headers();
+        headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
+        return this.http.get(`${this.infoService.event.Event.SessionUrl}/ListAttendanceTrackingScheduleItemSessions/${EventGuid.guid}`, headers).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else {
+                return res;
+            }
+        }).catch((err) => {
+            if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
+                return this.infoService.updateToken().flatMap(() => {
+                    return Observable.throw("UpdatedToken");
+                });
+            } else {
+                return Observable.throw(err);
+            }
+        });
+    }
+
+    fetchAccess(scheduleItemGuid) {
+        let headers = new Headers();
+        headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
+        return this.http.get(`${this.infoService.event.Event.AccessControlUrl}/${EventGuid.guid}/SessionAccessList/${scheduleItemGuid}`, headers).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                alert("Load session access list fault: " + res.Fault.Type);
+            } else {
+                return this.saveAccessList(scheduleItemGuid, res);
+            }
+        }).catch((err) => {
+            if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
+                return this.infoService.updateToken().flatMap(() => {
+                    return Observable.throw("UpdatedToken");
+                });
+            } else {
+                return Observable.throw(err);
+            }
+        });
+    }
+
+    saveAccessList(sessionGuid, registrantRecords) {
+        return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accesslist`, JSON.stringify(registrantRecords)).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else {
+                return res;
+            }
+        });
+    }
+
+    sessionCountCentral(scheduleItemGuid) {
+        let headers = new Headers();
+        headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
+        return this.http.get(`${this.infoService.event.Event.SessionUrl}/CountAttendeesAtSession/${EventGuid.guid}/${scheduleItemGuid}`, headers).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else {
+                return res;
+            }
+        }).catch((err) => {
+            if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
+                this.infoService.updateToken().flatMap(() => {
+                    return Observable.throw("UpdatedToken");
+                });
+            } else {
+                return Observable.throw(err);
+            }
+        });
+    }
 
     markUploaded(scanGuid) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans/${scanGuid}/uploaded`, {}).map(res => res.json()).map((res) => {
