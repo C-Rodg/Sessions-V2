@@ -37,12 +37,12 @@ export class MyApp {
       { title: 'Exit', component: '', icon: 'exit'}
     ]; 
     
+    // Start up application, if fails just try to set SessionToken
     this.infoService.startUpApplication().subscribe((data) => {
-      alert(JSON.stringify(data[0]));
-      alert(JSON.stringify(data[1]));
     }, (err) => {
-      alert('err!');
-      alert(JSON.stringify(err));
+      this.infoService.getAuthToken().subscribe((token) => {
+      }, (err) => {
+      });
     });
 
     (<any>window).OnLineaConnect = this.onZoneOnAppActive.bind(this);
@@ -61,11 +61,11 @@ export class MyApp {
       }, (err) => {
 
       });
-    })
+    });
   }
 
   // Click handler for side menu
-  openPage(page) {
+  openPage(page) {    
     if (page.icon === 'home' || page.icon === 'settings') {
       this.nav.setRoot(page.component);
     } else if (page.icon === 'refresh') {
