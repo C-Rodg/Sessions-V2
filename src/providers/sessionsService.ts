@@ -4,12 +4,16 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/of';
 import { InformationService } from './informationService';
 import { EventGuid } from '../helpers/event-guid';
 
 
 @Injectable()
 export class SessionsService {
+
+    allSessions = [];
+
     constructor(private http: Http, private infoService: InformationService) { }
 
     //////////////////////////////////
@@ -130,6 +134,15 @@ export class SessionsService {
         });
     }
 
+    saveScan(scan) {
+        return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans`, JSON.stringify(scan)).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
     markUploaded(scanGuid) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans/${scanGuid}/uploaded`, {}).map(res => res.json()).map((res) => {
             if (!res) {
@@ -143,6 +156,138 @@ export class SessionsService {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans/${scanGuid}/error`, {}).map(res => res.json()).map((res) => {
             if (!res) {
                 return Observable.throw('Invalid response object returned by the ajax call');
+            }
+            return res;
+        });
+    }
+
+    all() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else {
+                this.allSessions = [];
+                res.Sessions.forEach((session) => {
+                    // TODO: PROCESS SESSION w/ ProcessSessionDate(session); and set filter/order by?
+                    this.allSessions.push(session);
+                });
+                // return res or this.allSessions?
+                return res;
+            }
+        });
+    }
+
+    searchSessions(options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else {
+                // TODO: PROCESS SESSION and return?
+                return res;
+            }
+        });
+    }
+
+    countSessions(options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/count?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else if (res.hasOwnProperty("Count") && res.Sessions !== null) {
+                return res.Count;
+            } else {
+                return Observable.throw("Invalid response object returned by the ajax call.");
+            }
+        });
+    }
+
+    get(sessionGuid) {
+        if (this.allSessions.length > 0) {
+            const match = this.allSessions.filter((session) => {
+                return session.SessionGuid === sessionGuid;
+            })[0];
+            return Observable.of(match);
+        } else {
+            return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}`).map(res => res.json()).map((res) => {
+                if (res.Fault) {
+                    return Observable.throw(res.Fault);
+                } else if (res.Session) {
+                    // TODO: PROCESS SESSION and return..
+                    return res.Session;
+                } else {
+                    Observable.throw("Invalid response object returned by the ajax call.");
+                }
+            });
+        }
+    }
+
+    getAccess(sessionGuid, badgeId) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/${badgeId}`).map(res => res.json());
+    }
+
+    getScans(sessionGuid, options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/scans?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else if (res.hasOwnProperty('SessionScans') && res.SessionScans !== null) {
+                return res.SessionScans;
+            } else {
+                return Observable.throw("Invalid response object returned by the ajax call.");
+            }
+        });
+    }
+
+    getAllScans(options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/scans?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else if (res.hasOwnProperty("SessionScans") && res.SessionScans !== null) {
+                return res.SessionScans;
+            } else {
+                return Observable.throw("Invalid response object returned by the ajax call.");
+            }
+        });
+    }
+
+    getCount(sessionGuid, options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/scans/count?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    getTotalCount(options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/scans/count?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    getAccessCount(sessionGuid) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/count`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    getUniqueLocations() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/locations`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    getUniqueStartDates() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/startdates`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
             }
             return res;
         });
