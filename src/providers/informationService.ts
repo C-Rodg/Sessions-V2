@@ -1,18 +1,111 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/observable/forkJoin';
+import 'rxjs/add/operator/map';
 
 import { ClientInfo } from '../interfaces/client-info';
+import { CurrentToken } from '../interfaces/current-token';
+import { EventGuid } from '../helpers/eventGuid';
+import { EventInfo } from '../interfaces/event-info';
+import { LoginArgs } from '../interfaces/login-args';
 
 @Injectable()
 export class InformationService {
 
     client: ClientInfo;
+    event: EventInfo;
+    currentToken: CurrentToken;
 
     constructor(private http: Http) { }
 
     startUpApplication() {
-        return this.getClientInfo();
+        const eventInfo = this.getEventInformation();
+        const clientInfo = this.getClientInfo();
+        return Observable.forkJoin([eventInfo, clientInfo]).flatMap(() => {
+            return this.updateToken();
+        });
+    }
+
+    //////////////////////////////////
+    //  Login Services 
+    //////////////////////////////////
+
+    getAuthToken() {
+        return this.http.get(`http://localhost/events/${EventGuid}/sessiontoken`).map(res => res.json()).map((res) => {
+            if (res && res.SessionToken) {
+                this.currentToken.SessionToken = res.SessionToken;
+                return res;
+            } else {
+                Observable.throw("Invalid response object returned by the ajax call.");
+            }
+        });
+    }
+
+    getCurrentToken() {
+        return this.currentToken.SessionToken;
+    }
+
+    saveToken(token) {
+        alert("saving...");
+        this.currentToken.SessionToken = token;
+        return this.http.put(`http://localhost/events/${EventGuid}/sessiontoken`, this.currentToken).map(res => res.json());
+    }
+
+    initiateChallenge() {
+        const { LoginUrl, AuthCode, AuthGuid } = this.event.Event;
+        let loginArgs: LoginArgs = {
+            loginRestUrl: LoginUrl,
+            authCode: AuthCode,
+            authGuid: AuthGuid
+        };
+        alert("Initiating...");
+        alert(JSON.stringify(loginArgs));
+        return this.http.post(`${loginArgs.loginRestUrl}/InitiateChallenge/${loginArgs.authGuid}`, loginArgs).map(res => res.json());
+    }
+
+    computeHash(loginArgs) {
+        let req = {
+            authcode: loginArgs.authCode,
+            nonce: loginArgs.challenge.Nonce
+        };
+        alert('computing...');
+        return this.http.post(`http://localhost/digestauthentication/computehash`, req).map(res => res.json()).map((res) => {
+            loginArgs.hash = res.Hash;
+            return loginArgs;
+        });
+    }   
+
+    validateChallenge(loginArgs) {
+        let urlHash = loginArgs.hash.replace(/\//g, "_");
+        urlHash = urlHash.replace(/\+/g, "-");
+        alert("validating...");
+        return this.http.post(`${loginArgs.loginRestUrl}/ValidateChallenge/${loginArgs.challenge.ChallengeGuid}/${encodeURIComponent(urlHash)}`, loginArgs).map(res => res.json()).map((res) => {
+            let loginResult : CurrentToken = {
+                SessionToken: res.SessionToken
+            };
+            return loginResult;
+        });
+    }
+
+    updateToken() {
+        return this.initiateChallenge()
+            .flatMap(data => this.computeHash(data))
+            .flatMap(data => this.validateChallenge(data))
+            .flatMap(data => this.saveToken(data.SessionToken));
+    }
+
+
+    //////////////////////////////////
+    //  Event Info 
+    //////////////////////////////////
+
+    getEventInformation() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}`).map(res => res.json()).map((res) => {
+            this.event = res;        
+            return res;
+        });
     }
 
     //////////////////////////////////

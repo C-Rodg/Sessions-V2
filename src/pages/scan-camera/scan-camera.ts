@@ -15,7 +15,6 @@ const notificationTime = 1000;
 export class ScanCameraPage {
 
     leaveCameraMsg: boolean = false;
-    sessionLocked: boolean = false;
     session: DisplaySession = {};
 
     openPassword: boolean = false;
@@ -159,16 +158,16 @@ export class ScanCameraPage {
     promptUnlocked() {
       this.scanCameraService.turnOn();
       this.openPassword = false;
-      this.sessionLocked = false;      
+      this.session.isLocked = false;      
     }
 
     // Toggle lock/unlock of sessions
     openPasswordModal() {
-      if (this.sessionLocked) {
+      if (this.session.isLocked) {
         this.scanCameraService.turnOff();        
         this.openPassword = true;
       } else {
-        this.sessionLocked = true;
+        this.session.isLocked = true;
       }
     }
 

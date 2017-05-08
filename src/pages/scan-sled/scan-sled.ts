@@ -13,7 +13,6 @@ const notificationTime = 1000;
 })
 export class ScanSledPage {
     session: DisplaySession = {};
-    sessionLocked: boolean = false;
 
     showAcceptedBackground: boolean = false;
     showDeniedBackground: boolean = false;
@@ -27,7 +26,7 @@ export class ScanSledPage {
         private toastCtrl: ToastController,
         private loadingCtrl: LoadingController
     ) {     
-      this.session = this.params.data;  
+      this.session = this.params.data;
     }
 
     // Bind OnDataRead to this class, enable scan button
@@ -149,10 +148,10 @@ export class ScanSledPage {
 
     // Toggle lock/unlock of sessions
     openPasswordModal() {
-      if (this.sessionLocked) {
+      if (this.session.isLocked) {
         this.openPassword = true;
       } else {
-        this.sessionLocked = true;
+        this.session.isLocked = true;
       }
     }
 
@@ -164,7 +163,7 @@ export class ScanSledPage {
     // Password Prompt - Unlock Event Handler
     promptUnlocked() {
       this.openPassword = false;
-      this.sessionLocked = false;      
+      this.session.isLocked = false;      
     }
 
     // Click Handler - Refresh access list

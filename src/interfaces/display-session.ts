@@ -5,5 +5,6 @@ export interface DisplaySession {
     rangeDate? : string,
     startTime? : string,
     endTime? : string,
-    accessControl? : boolean
+    accessControl? : boolean,
+    isLocked? : boolean
 }

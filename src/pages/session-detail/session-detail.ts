@@ -74,7 +74,8 @@ export class SessionDetailPage {
       room: Location,
       startTime: start.format("h:mm A"),
       endTime: end.format("h:mm A"),
-      accessControl: TrackAttendance
+      accessControl: TrackAttendance,
+      isLocked: false
     };
     if (start.isSame(end, 'day')) {
       session.startDate = start.format('ddd, MMM Do, YYYY');

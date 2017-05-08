@@ -35,12 +35,14 @@ export class MyApp {
       { title: 'Upload Scans', component: '', icon: 'cloud-upload'},
       { title: 'Settings', component: SettingsPage, icon: 'settings'},
       { title: 'Exit', component: '', icon: 'exit'}
-    ];
-
+    ]; 
+    
     this.infoService.startUpApplication().subscribe((data) => {
-      //alert(JSON.stringify(data));
+      alert(JSON.stringify(data[0]));
+      alert(JSON.stringify(data[1]));
     }, (err) => {
-      //alert(JSON.stringify(err));
+      alert('err!');
+      alert(JSON.stringify(err));
     });
 
     (<any>window).OnLineaConnect = this.onZoneOnAppActive.bind(this);
