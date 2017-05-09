@@ -13,8 +13,11 @@ import { EventGuid } from '../helpers/event-guid';
 export class SessionsService {
 
     allSessions = [];
+    activeSession = null;
 
-    constructor(private http: Http, private infoService: InformationService) { }
+    constructor(private http: Http, private infoService: InformationService) { 
+        this.activeSession = localStorage.getItem('ActiveSession');
+    }
 
     //////////////////////////////////
     //  Uploading Services 
@@ -145,8 +148,8 @@ export class SessionsService {
 
     markUploaded(scanGuid) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans/${scanGuid}/uploaded`, {}).map(res => res.json()).map((res) => {
-            if (!res) {
-                return Observable.throw('Invalid response object returned by the ajax call');
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
             }
             return res;
         });
@@ -291,5 +294,29 @@ export class SessionsService {
             }
             return res;
         });
+    }
+
+    getActive() {   // TODO: PARSE OUT ACTIVE SESSION FROM JSON?
+        if (this.activeSession) {
+            return this.activeSession;
+        } else {
+            this.activeSession = localStorage.getItem('ActiveSession');
+            if (this.activeSession) {
+                return this.activeSession;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    setActive(s) {
+        if (s) {
+            localStorage.setItem('ActiveSession', JSON.stringify(s));
+            this.activeSession = s;
+        }
+    }
+
+    saveSessionList(sessions) {
+        
     }
 }
