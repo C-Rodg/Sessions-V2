@@ -68,6 +68,7 @@ export class SessionsService {
     //  Sessions Services 
     //////////////////////////////////
 
+    // Central Service
     fetchSessions() {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
@@ -89,6 +90,7 @@ export class SessionsService {
         });
     }
 
+    // Central Service
     fetchAccess(scheduleItemGuid) {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
@@ -124,6 +126,7 @@ export class SessionsService {
         });
     }
 
+    // Central Service
     sessionCountCentral(scheduleItemGuid) {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
@@ -134,9 +137,10 @@ export class SessionsService {
                 return res;
             }
         }).catch((err) => {
-            if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
-                this.infoService.updateToken().flatMap(() => {
-                    return Observable.throw("UpdatedToken");
+            let error = err.json();
+            if (error.Fault && error.Fault.Type === 'InvalidSessionFault') {
+                return this.infoService.updateToken().flatMap(() => {
+                    return this.http.get(`${this.infoService.event.Event.SessionUrl}/CountAttendeesAtSession/${EventGuid.guid}/${scheduleItemGuid}`, { headers }).map(res => res.json());
                 });
             } else {
                 return Observable.throw(err);

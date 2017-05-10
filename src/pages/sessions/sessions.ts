@@ -83,7 +83,7 @@ export class SessionsPage {
   testMethod() {
     const scheduleGuidAC = 'eb31279e-a9fc-44f2-8cae-372d17ed7c5d';
     const scheduleGuidNoAC= 'a5fbc15d-1983-4c2a-b753-37fff0d9adda';
-    this.sessionsService.fetchAccess(scheduleGuidAC).subscribe((data) => {
+    this.sessionsService.sessionCountCentral(scheduleGuidAC).subscribe((data) => {
       alert(JSON.stringify(data));
     }, (err) => {
       alert("ERROR!");
