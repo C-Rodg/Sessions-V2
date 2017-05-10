@@ -37,7 +37,7 @@ export class SessionsService {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
-        return this.http.post(url, d, headers).map(res => res.json()).flatMap(() => {
+        return this.http.post(url, d, { headers }).map(res => res.json()).flatMap(() => {
             return this.markUploaded(SessionScanGuid);
         }).catch((err) => {
             if (err && err.Fault && err.Fault.Type) {
@@ -71,19 +71,20 @@ export class SessionsService {
     fetchSessions() {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
-        return this.http.get(`${this.infoService.event.Event.SessionUrl}/ListAttendanceTrackingScheduleItemSessions/${EventGuid.guid}`, headers).map(res => res.json()).map((res) => {
+        return this.http.get(`${this.infoService.event.Event.SessionUrl}/ListAttendanceTrackingScheduleItemSessions/${EventGuid.guid}`, { headers }).map(res => res.json()).map((res) => {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             } else {
                 return res;
             }
         }).catch((err) => {
-            if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
+            let error = err.json();
+            if (error.Fault && error.Fault.Type === 'InvalidSessionFault') {
                 return this.infoService.updateToken().flatMap(() => {
-                    return Observable.throw("UpdatedToken");
+                    return this.http.get(`${this.infoService.event.Event.SessionUrl}/ListAttendanceTrackingScheduleItemSessions/${EventGuid.guid}`, { headers }).map(res => res.json());
                 });
             } else {
-                return Observable.throw(err);
+                 return Observable.throw(err);
             }
         });
     }
@@ -91,16 +92,21 @@ export class SessionsService {
     fetchAccess(scheduleItemGuid) {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
-        return this.http.get(`${this.infoService.event.Event.AccessControlUrl}/${EventGuid.guid}/SessionAccessList/${scheduleItemGuid}`, headers).map(res => res.json()).map((res) => {
+        return this.http.get(`${this.infoService.event.Event.AccessControlUrl}/${EventGuid.guid}/SessionAccessList/${scheduleItemGuid}`, { headers }).map(res => res.json()).map((res) => {
             if (res.Fault) {
                 alert("Load session access list fault: " + res.Fault.Type);
-            } else {
-                return this.saveAccessList(scheduleItemGuid, res);
-            }
-        }).catch((err) => {
-            if (err && err.Fault && err.Fault.Type === 'InvalidSessionFault') {
+                return Observable.throw(res.Fault);
+            } 
+            return res;
+        }).flatMap((res) => {
+            return this.saveAccessList(scheduleItemGuid, res);
+        })        
+        .catch((err) => {
+            let error = err.json();
+            if (error.Fault && error.Fault.Type === 'InvalidSessionFault') {
                 return this.infoService.updateToken().flatMap(() => {
-                    return Observable.throw("UpdatedToken");
+                    return this.http.get(`${this.infoService.event.Event.AccessControlUrl}/${EventGuid.guid}/SessionAccessList/${scheduleItemGuid}`, { headers }).map(res => res.json())
+                        .flatMap((res) => this.saveAccessList(scheduleItemGuid, res));
                 });
             } else {
                 return Observable.throw(err);
@@ -121,7 +127,7 @@ export class SessionsService {
     sessionCountCentral(scheduleItemGuid) {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
-        return this.http.get(`${this.infoService.event.Event.SessionUrl}/CountAttendeesAtSession/${EventGuid.guid}/${scheduleItemGuid}`, headers).map(res => res.json()).map((res) => {
+        return this.http.get(`${this.infoService.event.Event.SessionUrl}/CountAttendeesAtSession/${EventGuid.guid}/${scheduleItemGuid}`, { headers }).map(res => res.json()).map((res) => {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             } else {
@@ -344,7 +350,7 @@ export class SessionsService {
     }
 
     backgroundUpload() {
-        alert("Get pending uploads and uploading..");
+        //alert("Get pending uploads and uploading..");
         // TODO: Get pending uploads and upload...
     }
 }

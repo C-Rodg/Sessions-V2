@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, PickerController } from 'ionic-angular';
+import { SessionsService } from '../../providers/sessionsService';
 import { SessionDetailPage } from '../session-detail/session-detail'
 import * as moment from 'moment';
 
@@ -18,7 +19,11 @@ export class SessionsPage {
   fullSessionList: Array<any> = [];
   roomList: Array<any> = [];
   
-  constructor(public navCtrl: NavController, private pickerCtrl: PickerController) {
+  constructor(
+      public navCtrl: NavController, 
+      private pickerCtrl: PickerController,
+      private sessionsService: SessionsService      
+    ) {
     this.fullSessionList = this.parseDateValues(sessionsArray);   
     this.roomList = roomsArray; 
   }
@@ -73,6 +78,17 @@ export class SessionsPage {
         options: this.roomList
       });      
       picker.present();
+  }
+
+  testMethod() {
+    const scheduleGuidAC = 'eb31279e-a9fc-44f2-8cae-372d17ed7c5d';
+    const scheduleGuidNoAC= 'a5fbc15d-1983-4c2a-b753-37fff0d9adda';
+    this.sessionsService.fetchAccess(scheduleGuidAC).subscribe((data) => {
+      alert(JSON.stringify(data));
+    }, (err) => {
+      alert("ERROR!");
+      alert(JSON.stringify(err));
+    });
   }
 
 }
