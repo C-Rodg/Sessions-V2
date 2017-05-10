@@ -6,12 +6,13 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
 import { InformationService } from './informationService';
-import { EventGuid } from '../helpers/event-guid';
+import { EventGuid } from '../helpers/eventGuid';
 
 
 @Injectable()
 export class SessionsService {
 
+    backgroundInterval = null;
     allSessions = [];
     activeSession = null;
 
@@ -317,6 +318,33 @@ export class SessionsService {
     }
 
     saveSessionList(sessions) {
-        
+        // TODO: ? Convert external time format to the internal format??
+
+        return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions`, JSON.stringify(sessions)).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    /////////////////////////////////////
+    //      Background Uploading
+    /////////////////////////////////////
+
+    initializeBackgroundUpload(mins) {
+        clearInterval(this.backgroundInterval);
+        if(mins === 0) {
+            return false;
+        }
+        const time = mins * 60 * 1000;
+        this.backgroundInterval = setInterval(() => {
+            this.backgroundUpload();
+        }, time);
+    }
+
+    backgroundUpload() {
+        alert("Get pending uploads and uploading..");
+        // TODO: Get pending uploads and upload...
     }
 }

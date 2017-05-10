@@ -12,8 +12,8 @@ import { EventInfo } from '../interfaces/event-info';
 @Injectable()
 export class InformationService {
 
-    client: ClientInfo;
-    event: EventInfo;
+    client: ClientInfo = {};
+    event: EventInfo ={Event: {}};
     currentToken = {
         SessionToken: ""
     };
@@ -49,7 +49,7 @@ export class InformationService {
     }
 
     saveToken(loginArgs) {
-        alert("saving...");
+        alert("saving token...");
         this.currentToken.SessionToken = loginArgs.SessionToken;        
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessiontoken`, this.currentToken).map(res => res.json());
     }
@@ -61,7 +61,7 @@ export class InformationService {
             authCode: AuthCode,
             authGuid: AuthGuid
         };
-        alert("Initiating...");
+        alert("Initiating token update...");
         return this.http.post(`${loginArgs.loginRestUrl}/InitiateChallenge/${loginArgs.authGuid}`, loginArgs).map(res => res.json()).map((res) => {
             loginArgs['challenge'] = res;
             return loginArgs;
@@ -73,7 +73,6 @@ export class InformationService {
             authcode: loginArgs.authCode,
             nonce: loginArgs.challenge.Nonce
         };
-        alert('computing...');
         return this.http.post(`http://localhost/digestauthentication/computehash`, req).map(res => res.json()).map((res) => {
             loginArgs.hash = res.Hash;
             return loginArgs;
@@ -83,7 +82,6 @@ export class InformationService {
     validateChallenge(loginArgs) {
         let urlHash = loginArgs.hash.replace(/\//g, "_");
         urlHash = urlHash.replace(/\+/g, "-");
-        alert("validating...");
         return this.http.post(`${loginArgs.loginRestUrl}/ValidateChallenge/${loginArgs.challenge.ChallengeGuid}/${encodeURIComponent(urlHash)}`, loginArgs).map(res => res.json()).map((res) => {
             let loginResult = {
                 SessionToken: res.SessionToken
@@ -139,6 +137,10 @@ export class InformationService {
 
     getLineaStatus() : boolean {
         return (!this.client.Scanner || this.client.Scanner === 'None') ? false : true;
+    }
+
+    getClientName() : string {
+        return this.client.ClientName;
     }
 
 }

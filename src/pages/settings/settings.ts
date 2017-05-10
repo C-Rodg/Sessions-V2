@@ -3,6 +3,8 @@ import { NavController, ToastController, LoadingController, ModalController, Eve
 
 import { DeviceModal } from './device-modal/device-modal';
 import { InformationService } from '../../providers/informationService';
+import { SettingsService } from '../../providers/settingsService';
+import { SessionsService } from '../../providers/sessionsService';
 
 @Component({
   selector: 'page-settings',
@@ -18,18 +20,15 @@ export class SettingsPage {
     cameraBack: "checkmark"
   };
   
-  deviceName: string = "iTouch 084";
   pendingUploads: Number = 18;
-  backgroundUploadWait: Number = 4;
-  accessControl: Boolean = true;
-  accessControlOverride: Boolean = true;
-  capacityCheck: Boolean = false; 
 
   constructor(public navCtrl: NavController,
       private toastCtrl: ToastController,
       private loadingCtrl: LoadingController,
       private modalCtrl: ModalController,
       private infoService: InformationService,
+      private settingsService: SettingsService,
+      private sessionsService: SessionsService,
       private events: Events
   ) {
     this.buildAboutSection = this.buildAboutSection.bind(this);
@@ -39,6 +38,8 @@ export class SettingsPage {
   ionViewWillEnter() {
     this.infoService.getClientInfo().subscribe(this.buildAboutSection);
     this.events.subscribe('event:onLineaConnect', this.buildAboutSection);
+
+    // TODO: GET PENDING UPLOADS
   }
 
   // Unsubscribe from events
@@ -102,21 +103,22 @@ export class SettingsPage {
 
   // Click handler - edit device name
   handleEditDeviceName() {
-    let modal = this.modalCtrl.create(DeviceModal, { name: this.deviceName });
+    let modal = this.modalCtrl.create(DeviceModal, { name: this.settingsService.deviceName });
     modal.onDidDismiss(data => {
-      this.deviceName = data.name;
+      this.settingsService.setValue(data.name, 'deviceName');
     });
     modal.present();
   }
 
   // Change in background upload wait time
   startNewUploadTime() {
-
+    this.settingsService.storeCurrentSettings();
+    this.sessionsService.initializeBackgroundUpload(this.settingsService.backgroundUploadWait);
   }
 
   // Change in toggles
   saveSettings() {
-
+    this.settingsService.storeCurrentSettings();
   }
 
 }

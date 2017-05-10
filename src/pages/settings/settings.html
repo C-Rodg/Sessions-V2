@@ -51,7 +51,7 @@
         </ion-col>
         <ion-col center padding-left>
           <h1>Edit Device Name</h1>
-          <p class="secondary-text">{{deviceName}}</p>
+          <p class="secondary-text">{{settingsService.deviceName}}</p>
         </ion-col>
       </ion-row>
     </ion-card>
@@ -60,8 +60,8 @@
       <ion-row>
         <ion-col>
           <ion-item>
-            <ion-label>Autoupload every {{backgroundUploadWait}} mins</ion-label>
-            <ion-range min="0" max="10" step="1" snaps="true" color="p-accent" [(ngModel)]="backgroundUploadWait" (ionChange)="startNewUploadTime()">
+            <ion-label>Autoupload every {{settingsService.backgroundUploadWait}} mins</ion-label>
+            <ion-range min="0" max="10" step="1" snaps="true" color="p-accent" [(ngModel)]="settingsService.backgroundUploadWait" (ionChange)="startNewUploadTime()">
               <ion-icon range-left isActive="false" name="ios-timer-outline"></ion-icon>
               <ion-icon range-right name="timer" name="ios-timer"></ion-icon>
             </ion-range>
@@ -72,15 +72,15 @@
         <ion-col>
           <ion-item>
             <ion-label>Access Control</ion-label>
-            <ion-toggle color="p-accent" [(ngModel)]="accessControl" (ionChange)="saveSettings()"></ion-toggle>
+            <ion-toggle color="p-accent" [(ngModel)]="settingsService.accessControl" (ionChange)="saveSettings()"></ion-toggle>
           </ion-item>
         </ion-col>
       </ion-row>
-      <ion-row [ngClass]="{'no-ac' : !accessControl}" class="ac-override">
+      <ion-row [ngClass]="{'no-ac' : !settingsService.accessControl}" class="ac-override">
         <ion-col>
           <ion-item>
             <ion-label>Access Control Override</ion-label>
-            <ion-toggle color="p-accent" [(ngModel)]="accessControlOverride" (ionChange)="saveSettings()"></ion-toggle>
+            <ion-toggle color="p-accent" [(ngModel)]="settingsService.accessControlOverride" (ionChange)="saveSettings()"></ion-toggle>
           </ion-item>
         </ion-col>
       </ion-row>
@@ -88,7 +88,7 @@
         <ion-col>
           <ion-item>
             <ion-label>Capacity Check</ion-label>
-            <ion-toggle color="p-accent" [(ngModel)]="capacityCheck" (ionChange)="saveSettings()"></ion-toggle>
+            <ion-toggle color="p-accent" [(ngModel)]="settingsService.capacityCheck" (ionChange)="saveSettings()"></ion-toggle>
           </ion-item>
         </ion-col>
       </ion-row>

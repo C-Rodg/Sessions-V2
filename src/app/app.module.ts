@@ -16,6 +16,7 @@ import { ScanSledService } from '../providers/scanSledService';
 import { SoundService } from '../providers/soundService';
 import { InformationService } from '../providers/informationService';
 import { SessionsService } from '../providers/sessionsService';
+import { SettingsService } from '../providers/settingsService';
 
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
 import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
@@ -65,7 +66,8 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     ScanSledService,
     SoundService,
     InformationService,
-    SessionsService
+    SessionsService,
+    SettingsService
   ]
 })
 export class AppModule {}
