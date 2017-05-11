@@ -3,7 +3,6 @@ import { NavController, NavParams, AlertController, ToastController, LoadingCont
 
 import { ScanCameraService } from '../../providers/scanCameraService';
 import { SoundService } from '../../providers/soundService';
-import { DisplaySession } from '../../interfaces/display-session';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 
 const notificationTime = 1000;
@@ -15,7 +14,7 @@ const notificationTime = 1000;
 export class ScanCameraPage {
 
     leaveCameraMsg: boolean = false;
-    session: DisplaySession = {};
+    session = {};
 
     openPassword: boolean = false;
     showAcceptedBackground: boolean = false;
@@ -158,16 +157,16 @@ export class ScanCameraPage {
     promptUnlocked() {
       this.scanCameraService.turnOn();
       this.openPassword = false;
-      this.session.isLocked = false;      
+      this.session['isLocked'] = false;      
     }
 
     // Toggle lock/unlock of sessions
     openPasswordModal() {
-      if (this.session.isLocked) {
+      if (this.session['isLocked']) {
         this.scanCameraService.turnOff();        
         this.openPassword = true;
       } else {
-        this.session.isLocked = true;
+        this.session['isLocked'] = true;
       }
     }
 

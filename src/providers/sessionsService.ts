@@ -181,12 +181,13 @@ export class SessionsService {
                 return Observable.throw(res.Fault);
             } else {
                 this.allSessions = [];
-                res.Sessions.forEach((session) => {
-                    // TODO: PROCESS SESSION w/ ProcessSessionDate(session); and set filter/order by?
-                    this.allSessions.push(session);
+                res.Sessions.forEach((session) => {                   
+                    const s = this.processSessionData(session);
+                    this.allSessions.push(s);
                 });
+                 // TODO: set filter/order by? for allSessions
                 // return res or this.allSessions?
-                return res;
+                return this.allSessions;
             }
         });
     }
@@ -349,12 +350,31 @@ export class SessionsService {
         }
         const time = mins * 60 * 1000;
         this.backgroundInterval = setInterval(() => {
-            this.backgroundUpload();
+            this.backgroundUploadAction();
         }, time);
     }
 
-    backgroundUpload() {
+    backgroundUploadAction() {
         //alert("Get pending uploads and uploading..");
         // TODO: Get pending uploads and upload...
+    }
+
+    /////////////////////////////////////
+    //      Helpers
+    /////////////////////////////////////
+
+    private processSessionData(session) {
+        if (session !== null) {
+            if (session.hasOwnProperty("Topic") && session.Topic.indexOf("|") > 0) {
+                session.Topic = session.Topic.substr(session.Topic.indexOf('|') + 1, session.Topic.length);
+            }
+            if (session.hasOwnProperty("StartDateTime") && session.StartDateTime !== null) {
+                session.StartDateTime = session.StartDateTime.replace(/Z/, "");
+            }
+            if (session.hasOwnProperty("EndDateTime") && session.EndDateTime !== null) {
+                session.EndDateTime = session.EndDateTime.replace(/Z/, "");
+            }
+        }
+        return session;
     }
 }

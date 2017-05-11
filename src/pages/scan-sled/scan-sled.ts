@@ -2,7 +2,6 @@ import { Component, NgZone } from '@angular/core';
 import { NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
 
 import { ScanSledService } from '../../providers/scanSledService';
-import { DisplaySession } from '../../interfaces/display-session';
 import { SoundService } from '../../providers/soundService';
 
 const notificationTime = 1000;
@@ -12,7 +11,7 @@ const notificationTime = 1000;
   templateUrl: 'scan-sled.html'
 })
 export class ScanSledPage {
-    session: DisplaySession = {};
+    session = {};
 
     showAcceptedBackground: boolean = false;
     showDeniedBackground: boolean = false;
@@ -148,10 +147,10 @@ export class ScanSledPage {
 
     // Toggle lock/unlock of sessions
     openPasswordModal() {
-      if (this.session.isLocked) {
+      if (this.session['isLocked']) {
         this.openPassword = true;
       } else {
-        this.session.isLocked = true;
+        this.session['isLocked'] = true;
       }
     }
 
@@ -163,7 +162,7 @@ export class ScanSledPage {
     // Password Prompt - Unlock Event Handler
     promptUnlocked() {
       this.openPassword = false;
-      this.session.isLocked = false;      
+      this.session['isLocked'] = false;      
     }
 
     // Click Handler - Refresh access list

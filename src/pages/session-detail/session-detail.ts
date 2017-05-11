@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, PopoverController, LoadingController, ToastController } from 'ionic-angular';
 import * as moment from 'moment';
+
 import { MoreInfoPopover } from './more-info/more-info';
 import { ScanCameraPage } from '../scan-camera/scan-camera';
 import { ScanSledPage } from '../scan-sled/scan-sled';
-
-import { DisplaySession } from '../../interfaces/display-session';
 import { InformationService } from '../../providers/informationService';
-
-import { sessionsArray } from '../../test-data/mock-data';
+import { SessionsService } from '../../providers/sessionsService';
+import { addSessionDisplayValues } from '../../helpers/sessionHelpers';
 
 @Component({
   selector: 'page-session-detail',
@@ -17,9 +16,9 @@ import { sessionsArray } from '../../test-data/mock-data';
 export class SessionDetailPage {
 
   orderedSessions: Array<any> = [];  
-  session : DisplaySession = {};
-  prevSession: DisplaySession = {};
-  nextSession: DisplaySession = {};
+  session = {};
+  prevSession = {};
+  nextSession = {};
 
   accessListCount: Number = 84;
   scannedCount: Number = 237;
@@ -32,73 +31,45 @@ export class SessionDetailPage {
       private popoverCtrl: PopoverController,
       private toastCtrl: ToastController,
       private loadingCtrl: LoadingController,
-      private infoService: InformationService
+      private infoService: InformationService,
+      private sessionsService: SessionsService
   ) {  }
 
 
 
   // Convert session to display, determine the Previous and Next Sessions
   ionViewWillEnter() {
-    const d = this.params.data;
-    if (d) {
-      // If navParam is already in view format do nothing, else convert..
-      if (d.hasOwnProperty('title') && d.hasOwnProperty('room') && d.hasOwnProperty('startDate')) {
-        this.session = d;
-      } else {
-        this.session = this.convertServerSessionToDisplay(d);
-      }               
-    }
+    this.session = this.params.data;
+    // Get room list, determine prev/next sessions..
+    this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
     
     // TODO: Get Upload Counts..
-
-    // Determine prev/next sessions
-    this.orderedSessions = this.orderSessions(sessionsArray, this.session.room);
-    const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, this.session.title);
-    if (currentSessionIndex > -1) {
-      if (currentSessionIndex !== 0) {
-        this.prevSession = this.convertServerSessionToDisplay(this.orderedSessions[currentSessionIndex - 1]);
-      }
-      if (currentSessionIndex !== this.orderedSessions.length -1) {
-        this.nextSession = this.convertServerSessionToDisplay(this.orderedSessions[currentSessionIndex + 1]);
-      }
-    }
+    // ...      
   }
 
-  // Helper - Convert server session to display session
-  convertServerSessionToDisplay(serverSess) {
-    const { Topic, TrackAttendance, Location, StartDateTime, EndDateTime } = serverSess;
-    const start = moment(StartDateTime);
-    const end = moment(EndDateTime);
-    let session: DisplaySession = {
-      title: Topic,
-      room: Location,
-      startTime: start.format("h:mm A"),
-      endTime: end.format("h:mm A"),
-      accessControl: TrackAttendance,
-      isLocked: false
-    };
-    if (start.isSame(end, 'day')) {
-      session.startDate = start.format('ddd, MMM Do, YYYY');
-    } else {
-      session.startDate = start.format('ddd, MMM Do') + ' - ';
-      session.rangeDate = end.format('ddd, MMM Do, YYYY');
-    }
-    return session;
-  }
-
-  // Helper - Filter and order room sessions
-  orderSessions(arr, room) {
-    return arr.filter((session) => {
-      return session.Location === room;
-    }).sort((a, b) => {
-      return moment(a.StartDateTime).diff(moment(b.StartDateTime));
+  // Search for all sessions in this room, assign prev/next sessions
+  determineSessionOrder(room, guid) {
+    const q = room ? `location=${room}` : '';
+    this.sessionsService.searchSessions(q).subscribe((data) => {
+      this.orderedSessions = data.Sessions.sort((sessA, sessB) => {
+        return moment(sessA.StartDateTime).diff(moment(sessB.StartDateTime));
+      });
+      const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, guid);
+      if (currentSessionIndex > -1) {
+        if (currentSessionIndex !== 0) {
+          this.prevSession = addSessionDisplayValues(this.orderedSessions[currentSessionIndex - 1]);
+        }
+        if (currentSessionIndex !== this.orderedSessions.length - 1) {
+          this.nextSession = addSessionDisplayValues(this.orderedSessions[currentSessionIndex + 1]);
+        }
+      }
     });
   }
 
   // Helper - get current session index
-  getCurrentSessionIndex(arr, name) {
+  getCurrentSessionIndex(arr, guid) {
     return arr.findIndex((sess) => {
-      return sess.Topic === name;
+      return sess.SessionGuid === guid;
     });
   }
 
@@ -136,7 +107,6 @@ export class SessionDetailPage {
 
   // Show the Popover for pending uploads, next/previous sessions
   showPopover(ev) {
-    // TODO: Create correct session details and present popover
     const sessionDetails = {
       totalPending: this.pendingUploadCount,
       nextSession: this.nextSession,

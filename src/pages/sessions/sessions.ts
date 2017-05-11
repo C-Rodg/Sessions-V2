@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { NavController, PickerController } from 'ionic-angular';
+import { NavController, PickerController, LoadingController } from 'ionic-angular';
 import { SessionsService } from '../../providers/sessionsService';
 import { SessionDetailPage } from '../session-detail/session-detail'
 import * as moment from 'moment';
-
-import { roomsArray, sessionsArray } from '../../test-data/mock-data';
+import { addSessionDisplayValuesToList } from '../../helpers/sessionHelpers';
 
 @Component({
   selector: 'page-sessions',
@@ -12,34 +11,82 @@ import { roomsArray, sessionsArray } from '../../test-data/mock-data';
 })
 export class SessionsPage {
 
-  filterDate: string = "2017-03-29T13:47:20.789Z";
+  scheduleStartDate: string = "";
+  scheduleEndDate: string = "";
+  filterDate: string = "";
+
   filterRoom: string = "";
+  roomList: Array<any> = [];
+  
   showSearchFilter: boolean = false;
   filterSearch: string = "";
-  fullSessionList: Array<any> = [];
-  roomList: Array<any> = [];
+
+  fullSessionList: Array<any> = [];  
   
   constructor(
       public navCtrl: NavController, 
       private pickerCtrl: PickerController,
+      private loadingCtrl: LoadingController,
       private sessionsService: SessionsService      
-    ) {
-    this.fullSessionList = this.parseDateValues(sessionsArray);   
-    this.roomList = roomsArray; 
+    ) { 
   }
 
-  // Helper - Parse dates/times for display values
-  parseDateValues(arr) {
-    return arr.map((session) => {
-        return {
-          Topic: session.Topic,
-          TrackAttendance: session.TrackAttendance,
-          Location: session.Location,
-          StartDateTime: session.StartDateTime,
-          EndDateTime: session.EndDateTime,
-          StartTime: moment(session.StartDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('h:mm A'),
-          EndTime: moment(session.EndDateTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ').format('h:mm A')
-        };
+  ionViewWillEnter() {
+    this.getSessionList();
+    this.getDates();
+    this.getRooms();    
+  }
+
+  // Get Local Session list and convert to display format
+  getSessionList() {
+    let loading = this.loadingCtrl.create({
+      content: 'Loading sessions'
+    });
+    loading.present();
+    this.sessionsService.all().subscribe((data: any[]) => {
+      if (data && data.length > 0) {
+        this.fullSessionList = addSessionDisplayValuesToList(data).sort((sessA, sessB) => {
+          return moment(sessA.StartDateTime).diff(moment(sessB.StartDateTime));
+        });
+      }
+      loading.dismiss();
+    }, (err) => {
+      loading.dismiss();
+    });
+  }
+
+  // Get the unique rooms, generate roomList object
+  getRooms() {
+    this.sessionsService.getUniqueLocations().subscribe((data) => {
+      if (data.Locations && data.Locations.length > 0) {
+        const sortedRooms = data.Locations.sort();
+        let roomObj = sortedRooms.map((loc) => {
+          return { text: loc, value: loc };
+        });
+        roomObj.unshift({text: '-None-', value: ''});
+        this.roomList = roomObj;
+      }
+    });
+  }
+
+  // Get the unique schedule dates, assign filter date to a time between start/end dates
+  getDates() {    
+    this.sessionsService.getUniqueStartDates().subscribe((data) => {
+      if (data.StartDates && data.StartDates.length > 0) { 
+        const uniqueDates = data.StartDates.sort();     
+        const startDate = moment(uniqueDates[0], 'YYYY-MM-DD');
+        const endDate = moment(uniqueDates[uniqueDates.length - 1], 'YYYY-MM-DD');
+        const now = moment();
+        if (now.isBetween(startDate, endDate, 'day', '[]')) {
+          this.filterDate = now.format('YYYY-MM-DD');
+        } else if (now.isAfter(endDate)) {
+          this.filterDate = endDate.format('YYYY-MM-DD');
+        } else {
+          this.filterDate = startDate.format('YYYY-MM-DD');
+        }
+        this.scheduleStartDate = startDate.format('YYYY-MM-DD');
+        this.scheduleEndDate = endDate.format('YYYY-MM-DD');
+      }
     });
   }
 
@@ -79,16 +126,4 @@ export class SessionsPage {
       });      
       picker.present();
   }
-
-  testMethod() {
-    const scheduleGuidAC = 'eb31279e-a9fc-44f2-8cae-372d17ed7c5d';
-    const scheduleGuidNoAC= 'a5fbc15d-1983-4c2a-b753-37fff0d9adda';
-    this.sessionsService.sessionCountCentral(scheduleGuidAC).subscribe((data) => {
-      alert(JSON.stringify(data));
-    }, (err) => {
-      alert("ERROR!");
-      alert(JSON.stringify(err));
-    });
-  }
-
 }

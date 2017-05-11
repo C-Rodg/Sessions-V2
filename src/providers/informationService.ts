@@ -49,7 +49,6 @@ export class InformationService {
     }
 
     saveToken(loginArgs) {
-        alert("saving token...");
         this.currentToken.SessionToken = loginArgs.SessionToken;        
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessiontoken`, this.currentToken).map(res => res.json());
     }
@@ -61,7 +60,6 @@ export class InformationService {
             authCode: AuthCode,
             authGuid: AuthGuid
         };
-        alert("Initiating token update...");
         return this.http.post(`${loginArgs.loginRestUrl}/InitiateChallenge/${loginArgs.authGuid}`, loginArgs).map(res => res.json()).map((res) => {
             loginArgs['challenge'] = res;
             return loginArgs;

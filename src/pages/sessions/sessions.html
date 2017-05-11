@@ -17,7 +17,7 @@
     </ion-item>
     <ion-item>
       <ion-label>Date:</ion-label>
-      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="2017-03-27" max="2017-04-08" [(ngModel)]="filterDate"></ion-datetime>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{scheduleStartDate}}" max="{{scheduleEndDate}}" [(ngModel)]="filterDate"></ion-datetime>
     </ion-item>
     <ion-item class="picker">
       <ion-label>Room:</ion-label>
@@ -39,15 +39,10 @@
             <h2>{{session.Topic}}</h2>
             <p>{{session.Location}}</p>
             <p class="list__sessiondetials--top">{{session.StartTime}} - {{session.EndTime}}</p>
-            <div *ngIf="session.TrackAttendance" class="list__tracking"><ion-icon name="ios-key-outline"></ion-icon></div>
+            <div *ngIf="session.AccessControl" class="list__tracking"><ion-icon name="ios-key-outline"></ion-icon></div>
           </ion-item>
         </ion-list>
       </ion-card>
-    </div>
-
-    <div>
-      <h2>Testing Methods:</h2>
-      <div><button (click)="testMethod()">TEST METHOD HERE</button></div>
     </div>
     
   </div>

@@ -7,7 +7,7 @@ export class FilterDates implements PipeTransform {
         const filter = moment(filterDate);
         if (filter) {
             return sessions.filter((session) => {
-                let startDate = moment(session.StartDateTime),
+                const startDate = moment(session.StartDateTime),
                     endDate = moment(session.EndDateTime);      
                 if (filter.isSameOrAfter(startDate, 'day') && filter.isSameOrBefore(endDate, 'day')) {
                     return true;

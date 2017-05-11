@@ -3,11 +3,11 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title class="scan__nav__title"><ion-icon name="ios-key-outline" *ngIf="session.accessControl"></ion-icon> Scan</ion-title>
+    <ion-title class="scan__nav__title"><ion-icon name="ios-key-outline" *ngIf="session.AccessControl"></ion-icon> Scan</ion-title>
     <ion-buttons end class="navbar-btns">
-      <button ion-button icon-only (click)="toggleLight()">
+      <!--<button ion-button icon-only (click)="toggleLight()" class="hidden">
         <ion-icon name="{{scanCameraService.torch === 'OFF' ? 'ios-flash-outline' : 'ios-flash'}}"></ion-icon>
-      </button>
+      </button>-->
       <button ion-button icon-only (click)="toggleCamera()">
         <ion-icon name="reverse-camera"></ion-icon>
       </button>
@@ -24,10 +24,10 @@
           <div center>scans</div>
         </ion-col>
         <ion-col class="scan-info" padding-left>
-          <h2>{{session.title}}</h2>
-          <p class="date">{{session.startDate}}</p>
-          <p class="range-date" *ngIf="session.rangeDate">{{session.rangeDate}}</p>
-          <p class="time">{{session.startTime}} - {{session.endTime}}</p>
+          <h2>{{session.Topic}}</h2>
+          <p class="date">{{session.DisplayStartDate}}</p>
+          <p class="range-date" *ngIf="session.DisplayRangeDate">{{session.DisplayRangeDate}}</p>
+          <p class="time">{{session.StartTime}} - {{session.EndTime}}</p>
         </ion-col>
       </ion-row>
     </ion-card>
@@ -38,9 +38,9 @@
 
 <ion-footer class="scan-footer">
   <ion-toolbar color="p-primary">
-    <ion-title>{{session.room}}</ion-title>
+    <ion-title>{{session.Location}}</ion-title>
     <ion-buttons right>
-      <button ion-button icon-only (click)="refreshAccessList()" *ngIf="session.accessControl" class="m-r-10">
+      <button ion-button icon-only (click)="refreshAccessList()" *ngIf="session.AccessControl" class="m-r-10">
         <ion-icon name='refresh'></ion-icon>
       </button>
       <button ion-button icon-only (click)="openPasswordModal()">
