@@ -3,7 +3,6 @@ import { NavController, PickerController, LoadingController } from 'ionic-angula
 import { SessionsService } from '../../providers/sessionsService';
 import { SessionDetailPage } from '../session-detail/session-detail'
 import * as moment from 'moment';
-import { addSessionDisplayValuesToList } from '../../helpers/sessionHelpers';
 
 @Component({
   selector: 'page-sessions',
@@ -20,8 +19,6 @@ export class SessionsPage {
   
   showSearchFilter: boolean = false;
   filterSearch: string = "";
-
-  fullSessionList: Array<any> = [];  
   
   constructor(
       public navCtrl: NavController, 
@@ -32,27 +29,8 @@ export class SessionsPage {
   }
 
   ionViewWillEnter() {
-    this.getSessionList();
     this.getDates();
     this.getRooms();    
-  }
-
-  // Get Local Session list and convert to display format
-  getSessionList() {
-    let loading = this.loadingCtrl.create({
-      content: 'Loading sessions'
-    });
-    loading.present();
-    this.sessionsService.all().subscribe((data: any[]) => {
-      if (data && data.length > 0) {
-        this.fullSessionList = addSessionDisplayValuesToList(data).sort((sessA, sessB) => {
-          return moment(sessA.StartDateTime).diff(moment(sessB.StartDateTime));
-        });
-      }
-      loading.dismiss();
-    }, (err) => {
-      loading.dismiss();
-    });
   }
 
   // Get the unique rooms, generate roomList object

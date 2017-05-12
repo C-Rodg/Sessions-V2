@@ -6,6 +6,7 @@ import { SettingsPage } from '../pages/settings/settings';
 import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 
 import { InformationService } from '../providers/informationService';
+import { SessionsService } from '../providers/sessionsService';
 
 @Component({
   templateUrl: 'app.html'
@@ -25,7 +26,8 @@ export class MyApp {
         private alertCtrl: AlertController,
         private events: Events,
         private zone: NgZone,
-        private infoService: InformationService
+        private infoService: InformationService,
+        private sessionsService: SessionsService
   ) {
 
     // Create side menu
@@ -37,10 +39,12 @@ export class MyApp {
       { title: 'Exit', component: '', icon: 'exit'}
     ]; 
     
-    // Start up application, if fails just try to set SessionToken
+    // Start up application, if fails just try to set SessionToken, assign allSessions
     this.infoService.startUpApplication().subscribe((data) => {
+      this.sessionsService.all().subscribe(d => {});
     }, (err) => {
       this.infoService.getAuthToken().subscribe((token) => {
+        this.sessionsService.all().subscribe((d) => {});
       }, (err) => {
       });
     });
@@ -69,14 +73,12 @@ export class MyApp {
     if (page.icon === 'home' || page.icon === 'settings') {
       this.nav.setRoot(page.component);
     } else if (page.icon === 'refresh') {
-      // TODO: SYNC SESSIONS AND REFRESH ACCESS LISTS
       let loader = this.loadingCtrl.create({
         content: 'Syncing Sessions...',
         dismissOnPageChange: true
       });    
       loader.present();
-      // TODO: Faking time to hide...
-      setTimeout(() => {
+      this.sessionsService.refreshSessionsThenAccessLists().subscribe((data) => {
         loader.dismiss();
         let toast = this.toastCtrl.create({
           message: "Finished syncing sessions!",
@@ -84,7 +86,15 @@ export class MyApp {
           position: 'top'
         });
         toast.present();
-      }, 3000);
+      }, (err) => {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: "Unable to sync sessions at this time...",
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+      });     
     } else if (page.icon === 'cloud-upload') {
       // TODO: UPLOAD PENDING COUNTS...
       let loader = this.loadingCtrl.create({
@@ -92,8 +102,7 @@ export class MyApp {
         dismissOnPageChange: true
       });
       loader.present();
-      // TODO: Faking time to hide...
-      setTimeout(() => {
+      this.sessionsService.refreshSessionsAndSave().subscribe((data) => {
         loader.dismiss();
         let toast = this.toastCtrl.create({
           message: `Finished uploading ${this.pendingUploads} scans!`,
@@ -102,7 +111,16 @@ export class MyApp {
         });
         toast.present();
         this.pendingUploads = 0;
-      }, 3200);
+      }, (err) => {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: `Unable to upload all pending scans...`,
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+        this.pendingUploads = 0;
+      });
     } else if (page.icon === 'exit') {
       window.location.href = "http://localhost/navigate/home";  
     }

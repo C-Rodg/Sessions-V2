@@ -32,7 +32,7 @@
 <ion-content>
   <div class="{{showSearchFilter ? 'search-open' : ''}}">
     
-    <div *ngFor="let session of (fullSessionList | filterDates:filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
+    <div *ngFor="let session of (this.sessionsService.allSessions | filterDates:filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
       <ion-card tappable (tap)="goToSession(session)">
         <ion-list no-lines class="list__session">
           <ion-item class="list__sessiondetails">

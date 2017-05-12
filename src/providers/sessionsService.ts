@@ -5,6 +5,8 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
+import * as moment from 'moment';
+
 import { InformationService } from './informationService';
 import { EventGuid } from '../helpers/eventGuid';
 
@@ -76,19 +78,25 @@ export class SessionsService {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             } else {
-                return res;
+                return res.ScheduleItemSessions;
             }
         }).catch((err) => {
             let error = err.json();
             if (error.Fault && error.Fault.Type === 'InvalidSessionFault') {
                 return this.infoService.updateToken().flatMap(() => {
-                    return this.http.get(`${this.infoService.event.Event.SessionUrl}/ListAttendanceTrackingScheduleItemSessions/${EventGuid.guid}`, { headers }).map(res => res.json());
+                    return this.http.get(`${this.infoService.event.Event.SessionUrl}/ListAttendanceTrackingScheduleItemSessions/${EventGuid.guid}`, { headers }).map(res => res.json()).map((d) => {
+                        if (d.Fault) {
+                            return Observable.throw(d.Fault);
+                        } else {
+                            return d.ScheduleItemSessions;
+                        }
+                    })
                 });
             } else {
                  return Observable.throw(err);
             }
         });
-    }
+    }    
 
     // Central Service
     fetchAccess(scheduleItemGuid) {
@@ -180,13 +188,7 @@ export class SessionsService {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             } else {
-                this.allSessions = [];
-                res.Sessions.forEach((session) => {                   
-                    const s = this.processSessionData(session);
-                    this.allSessions.push(s);
-                });
-                 // TODO: set filter/order by? for allSessions
-                // return res or this.allSessions?
+                this.allSessions = this.sortByStartDate(this.convertListToDisplaySession(res.Sessions));
                 return this.allSessions;
             }
         });
@@ -197,8 +199,7 @@ export class SessionsService {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             } else {
-                // TODO: PROCESS SESSION and return?
-                return res;
+                return this.sortByStartDate(this.convertListToDisplaySession(res.Sessions));
             }
         });
     }
@@ -227,7 +228,7 @@ export class SessionsService {
                     return Observable.throw(res.Fault);
                 } else if (res.Session) {
                     // TODO: PROCESS SESSION and return..
-                    return res.Session;
+                    return this.convertToDisplaySession(res.Session); // is this just one session? or an array?
                 } else {
                     Observable.throw("Invalid response object returned by the ajax call.");
                 }
@@ -237,6 +238,10 @@ export class SessionsService {
 
     getAccess(sessionGuid, badgeId) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/${badgeId}`).map(res => res.json());
+    }
+
+    getAccessList(sessionGuid, options) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList?${options}`).map(res => res.json());
     }
 
     getScans(sessionGuid, options) {
@@ -329,14 +334,52 @@ export class SessionsService {
     }
 
     saveSessionList(sessions) {
-        // TODO: ? Convert external time format to the internal format??
-
+        let i = 0, len = sessions.length;
+        for(; i < len; i++) {
+            if (sessions[i].StartDateTime !== null) {
+                sessions[i].StartDateTime = new Date(sessions[i].StartDateTime);
+            }
+            if (sessions[i].EndDateTime !== null) {
+                sessions[i].EndDateTime = new Date(sessions[i].EndDateTime);
+            }
+            sessions[i].SessionGuid = sessions[i].ScheduleItemGuid;
+            sessions[i].SessionKey = sessions[i].ScheduleItemKey;
+        }
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions`, JSON.stringify(sessions)).map(res => res.json()).map((res) => {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             }
             return res;
         });
+    }
+
+    // Get from central, save list, re-assign this.allSessions
+    refreshSessionsAndSave() {
+        return this.fetchSessions().flatMap((data) => {
+            return this.saveSessionList(data);
+        }).flatMap((d) => {
+            return this.all();
+        });
+    }
+
+    refreshAccessListsAndSave() {
+        const accessControlSessions = this.allSessions.filter((session) => {
+            return session.AccessControl;
+        });
+        if(accessControlSessions.length === 0) {
+            return Observable.of(null);
+        }
+        const accessListRequests = accessControlSessions.map((session) => {
+            return this.fetchAccess(session.SessionGuid).map((d) => d)
+                .catch((err) => {
+                    return Observable.of(null);
+                });
+        });
+        return Observable.forkJoin(accessListRequests);
+    }
+
+    refreshSessionsThenAccessLists() {
+        return this.refreshSessionsAndSave().flatMap(() => this.refreshAccessListsAndSave());
     }
 
     /////////////////////////////////////
@@ -363,8 +406,15 @@ export class SessionsService {
     //      Helpers
     /////////////////////////////////////
 
-    private processSessionData(session) {
+    // Convert list of sessions to display session objects
+    private convertListToDisplaySession(arr) {
+        return arr.map(this.convertToDisplaySession);
+    }
+
+    // convert server session object to display session object, fix UTC time
+    private convertToDisplaySession(session) {
         if (session !== null) {
+            
             if (session.hasOwnProperty("Topic") && session.Topic.indexOf("|") > 0) {
                 session.Topic = session.Topic.substr(session.Topic.indexOf('|') + 1, session.Topic.length);
             }
@@ -374,7 +424,47 @@ export class SessionsService {
             if (session.hasOwnProperty("EndDateTime") && session.EndDateTime !== null) {
                 session.EndDateTime = session.EndDateTime.replace(/Z/, "");
             }
+
+            const AccessControl = session.Category.toUpperCase() === 'ACCESS CONTROL' ? true : false;
+            const start = moment(session.StartDateTime, 'YYYY-MM-DDTHH:mm:ss.SSS');
+            const end = moment(session.EndDateTime, 'YYYY-MM-DDTHH:mm:ss.SSS');
+            let displayDates = {};
+            if (start.isSame(end, 'day')) {
+                displayDates['DisplayStartDate'] = start.format('ddd, MMM Do, YYYY');
+            } else {
+                displayDates['DisplayStartDate'] = start.format('ddd, MMM Do') + ' - ';
+                displayDates['DisplayRangeDate'] = end.format('ddd, MMM Do, YYYY');
+            }
+            return Object.assign({}, session, displayDates, {
+                AccessControl,        
+                StartTime: start.format('h:mm A'),
+                EndTime: end.format('h:mm A'),       
+                isLocked: false
+            });
         }
+    }
+
+    // Remove props from list of display session props
+    private removeListDisplaySessionProps(arr) {
+        return arr.map(this.removeDisplaySessionProps);
+    }
+
+    // Remove props from display session object
+    private removeDisplaySessionProps(session) {
+        if (session !== null) {
+            delete session.DisplayStartDate;
+            delete session.DisplayRangeDate;
+            delete session.StartTime;
+            delete session.EndTime;
+            delete session.isLocked;            
+        }        
         return session;
+    }
+
+    // Sort by start date
+    sortByStartDate(arr) {
+        return arr.sort((sessA, sessB) => {
+            return moment(sessA.StartDateTime).diff(moment(sessB.StartDateTime));
+        });
     }
 }

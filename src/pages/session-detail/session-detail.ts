@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, PopoverController, LoadingController, ToastController } from 'ionic-angular';
-import * as moment from 'moment';
 
 import { MoreInfoPopover } from './more-info/more-info';
 import { ScanCameraPage } from '../scan-camera/scan-camera';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 import { InformationService } from '../../providers/informationService';
 import { SessionsService } from '../../providers/sessionsService';
-import { addSessionDisplayValues } from '../../helpers/sessionHelpers';
 
 @Component({
   selector: 'page-session-detail',
@@ -51,16 +49,14 @@ export class SessionDetailPage {
   determineSessionOrder(room, guid) {
     const q = room ? `location=${room}` : '';
     this.sessionsService.searchSessions(q).subscribe((data) => {
-      this.orderedSessions = data.Sessions.sort((sessA, sessB) => {
-        return moment(sessA.StartDateTime).diff(moment(sessB.StartDateTime));
-      });
+      this.orderedSessions = data;
       const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, guid);
       if (currentSessionIndex > -1) {
         if (currentSessionIndex !== 0) {
-          this.prevSession = addSessionDisplayValues(this.orderedSessions[currentSessionIndex - 1]);
+          this.prevSession = this.orderedSessions[currentSessionIndex - 1];
         }
         if (currentSessionIndex !== this.orderedSessions.length - 1) {
-          this.nextSession = addSessionDisplayValues(this.orderedSessions[currentSessionIndex + 1]);
+          this.nextSession = this.orderedSessions[currentSessionIndex + 1];
         }
       }
     });
