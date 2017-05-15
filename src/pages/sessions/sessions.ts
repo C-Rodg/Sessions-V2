@@ -12,10 +12,9 @@ export class SessionsPage {
 
   scheduleStartDate: string = "";
   scheduleEndDate: string = "";
-  filterDate: string = "";
 
   filterRoom: string = "";
-  roomList: Array<any> = [];
+  roomListOpts: Array<any> = [];
   
   showSearchFilter: boolean = false;
   filterSearch: string = "";
@@ -29,44 +28,15 @@ export class SessionsPage {
   }
 
   ionViewWillEnter() {
-    this.getDates();
     this.getRooms();    
   }
 
   // Get the unique rooms, generate roomList object
   getRooms() {
-    this.sessionsService.getUniqueLocations().subscribe((data) => {
-      if (data.Locations && data.Locations.length > 0) {
-        const sortedRooms = data.Locations.sort();
-        let roomObj = sortedRooms.map((loc) => {
-          return { text: loc, value: loc };
-        });
-        roomObj.unshift({text: '-None-', value: ''});
-        this.roomList = roomObj;
-      }
-    });
-  }
-
-  // Get the unique schedule dates, assign filter date to a time between start/end dates
-  getDates() {    
-    this.sessionsService.getUniqueStartDates().subscribe((data) => {
-      if (data.StartDates && data.StartDates.length > 0) { 
-        const uniqueDates = data.StartDates.sort();     
-        const startDate = moment(uniqueDates[0], 'YYYY-MM-DD');
-        const endDate = moment(uniqueDates[uniqueDates.length - 1], 'YYYY-MM-DD');
-        const now = moment();
-        if (now.isBetween(startDate, endDate, 'day', '[]')) {
-          this.filterDate = now.format('YYYY-MM-DD');
-        } else if (now.isAfter(endDate)) {
-          this.filterDate = endDate.format('YYYY-MM-DD');
-        } else {
-          this.filterDate = startDate.format('YYYY-MM-DD');
-        }
-        this.scheduleStartDate = startDate.format('YYYY-MM-DD');
-        this.scheduleEndDate = endDate.format('YYYY-MM-DD');
-      }
-    });
-  }
+    this.roomListOpts = [{text: '-None-', value: ''}, ...this.sessionsService.rooms.map((loc) => {
+      return { text: loc, value: loc };
+    })];    
+  }  
 
   // Go to the session detail page
   goToSession(session) {    
@@ -92,7 +62,7 @@ export class SessionsPage {
             this.filterRoom = data.rooms.value;         
         }
       });
-      const idx = this.roomList.findIndex((el) => {
+      const idx = this.roomListOpts.findIndex((el) => {
         return el.value === this.filterRoom;
       });
       picker.addColumn({
@@ -100,7 +70,7 @@ export class SessionsPage {
         align: 'center',
         selectedIndex: idx,
         columnWidth: '100%',
-        options: this.roomList
+        options: this.roomListOpts
       });      
       picker.present();
   }

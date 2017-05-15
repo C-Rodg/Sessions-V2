@@ -17,6 +17,10 @@ export class SessionsService {
     backgroundInterval = null;
     allSessions = [];
     activeSession = null;
+    filterDate: string = "";
+    scheduleStartDate: string = "";
+    scheduleEndDate: string = "";
+    rooms: any = [];
 
     constructor(private http: Http, private infoService: InformationService) { 
         this.activeSession = localStorage.getItem('ActiveSession');
@@ -382,6 +386,36 @@ export class SessionsService {
         return this.refreshSessionsAndSave().flatMap(() => this.refreshAccessListsAndSave());
     }
 
+    // Update scheduleStartDate, scheduleEndDate, set filterDate if not yet set
+    refreshRoomsAndDates() {
+        return this.getUniqueLocations().map((res) => {
+            if (res && res.Locations) {
+                this.rooms = res.Locations.sort();
+            }
+            return res;         
+        }).flatMap(() => this.getUniqueStartDates()).map((d) => {
+            if (d && d.StartDates) {
+                const uniqueDates = d.StartDates.sort();
+                const startDate = moment(uniqueDates[0], 'YYYY-MM-DD');
+                const endDate = moment(uniqueDates[uniqueDates.length - 1], 'YYYY-MM-DD');
+                this.scheduleStartDate = startDate.format('YYYY-MM-DD');
+                this.scheduleEndDate = endDate.format('YYYY-MM-DD');
+                // If filter date hasn't yet been set
+                if (!this.filterDate) {
+                    const now = moment();
+                    if (now.isBetween(startDate, endDate, 'day', '[]')) {
+                        this.filterDate = now.format('YYYY-MM-DD');
+                    } else if (now.isAfter(endDate)) {
+                        this.filterDate = endDate.format('YYYY-MM-DD');
+                    } else {
+                        this.filterDate = startDate.format('YYYY-MM-DD');
+                    }
+                }                
+            }
+            return d;
+        });
+    }
+
     /////////////////////////////////////
     //      Background Uploading
     /////////////////////////////////////
@@ -405,6 +439,7 @@ export class SessionsService {
     /////////////////////////////////////
     //      Helpers
     /////////////////////////////////////
+
 
     // Convert list of sessions to display session objects
     private convertListToDisplaySession(arr) {

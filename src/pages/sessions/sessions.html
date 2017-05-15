@@ -17,7 +17,7 @@
     </ion-item>
     <ion-item>
       <ion-label>Date:</ion-label>
-      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{scheduleStartDate}}" max="{{scheduleEndDate}}" [(ngModel)]="filterDate"></ion-datetime>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{scheduleStartDate}}" max="{{scheduleEndDate}}" [(ngModel)]="sessionsService.filterDate"></ion-datetime>
     </ion-item>
     <ion-item class="picker">
       <ion-label>Room:</ion-label>
@@ -32,7 +32,7 @@
 <ion-content>
   <div class="{{showSearchFilter ? 'search-open' : ''}}">
     
-    <div *ngFor="let session of (this.sessionsService.allSessions | filterDates:filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
+    <div *ngFor="let session of (this.sessionsService.allSessions | filterDates:sessionsService.filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
       <ion-card tappable (tap)="goToSession(session)">
         <ion-list no-lines class="list__session">
           <ion-item class="list__sessiondetails">
