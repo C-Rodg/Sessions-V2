@@ -41,10 +41,10 @@ export class MyApp {
     
     // Start up application, if fails just try to set SessionToken, assign allSessions
     this.infoService.startUpApplication().subscribe((data) => {
-      this.sessionsService.all().subscribe(d => {});
+      this.sessionsService.startUpSessions().subscribe(d => {});
     }, (err) => {
       this.infoService.getAuthToken().subscribe((token) => {
-        this.sessionsService.all().subscribe((d) => {});
+        this.sessionsService.startUpSessions().subscribe((d) => {});
       }, (err) => {
       });
     });

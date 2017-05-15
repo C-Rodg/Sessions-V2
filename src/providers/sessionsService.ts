@@ -26,6 +26,11 @@ export class SessionsService {
         this.activeSession = localStorage.getItem('ActiveSession');
     }
 
+    // Assign props - allSessions, scheduleStartDate, scheduleEndDate, filterDate, and rooms
+    startUpSessions() {
+        return this.all().flatMap(() => this.refreshRoomsAndDates());
+    }
+
     //////////////////////////////////
     //  Uploading Services 
     //////////////////////////////////
@@ -74,7 +79,7 @@ export class SessionsService {
     //  Sessions Services 
     //////////////////////////////////
 
-    // Central Service
+    // Get all sessions from central
     fetchSessions() {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
@@ -102,7 +107,7 @@ export class SessionsService {
         });
     }    
 
-    // Central Service
+    // For a scheduleItemGuid, fetch the access control list and then save to local
     fetchAccess(scheduleItemGuid) {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
@@ -128,6 +133,7 @@ export class SessionsService {
         });
     }
 
+    // For a session guid and array of reg records, save the access list to local
     saveAccessList(sessionGuid, registrantRecords) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accesslist`, JSON.stringify(registrantRecords)).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -138,7 +144,7 @@ export class SessionsService {
         });
     }
 
-    // Central Service
+    // For a scheduleItemGuid, get the total session count from Central
     sessionCountCentral(scheduleItemGuid) {
         let headers = new Headers();
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
@@ -156,6 +162,18 @@ export class SessionsService {
                 });
             } else {
                 return Observable.throw(err);
+            }
+        });
+    }
+
+    // Get all local sessions, assign prop allSessions
+    all() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            } else {
+                this.allSessions = this.sortByStartDate(this.convertListToDisplaySession(res.Sessions));
+                return this.allSessions;
             }
         });
     }
@@ -185,18 +203,7 @@ export class SessionsService {
             }
             return res;
         });
-    }
-
-    all() {
-        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions`).map(res => res.json()).map((res) => {
-            if (res.Fault) {
-                return Observable.throw(res.Fault);
-            } else {
-                this.allSessions = this.sortByStartDate(this.convertListToDisplaySession(res.Sessions));
-                return this.allSessions;
-            }
-        });
-    }
+    }    
 
     searchSessions(options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions?${options}`).map(res => res.json()).map((res) => {
@@ -290,26 +297,9 @@ export class SessionsService {
         });
     }
 
+
     getAccessCount(sessionGuid) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/count`).map(res => res.json()).map((res) => {
-            if (res.Fault) {
-                return Observable.throw(res.Fault);
-            }
-            return res;
-        });
-    }
-
-    getUniqueLocations() {
-        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/locations`).map(res => res.json()).map((res) => {
-            if (res.Fault) {
-                return Observable.throw(res.Fault);
-            }
-            return res;
-        });
-    }
-
-    getUniqueStartDates() {
-        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/startdates`).map(res => res.json()).map((res) => {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             }
@@ -337,6 +327,27 @@ export class SessionsService {
         }
     }
 
+    // Return an array of unique room locations
+    getUniqueLocations() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/locations`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    // Return array of unique start dates
+    getUniqueStartDates() {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/startdates`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }    
+
+    // Convert sessions to database format and save
     saveSessionList(sessions) {
         let i = 0, len = sessions.length;
         for(; i < len; i++) {
@@ -357,7 +368,7 @@ export class SessionsService {
         });
     }
 
-    // Get from central, save list, re-assign this.allSessions
+    // Get from central, save list, re-assign this.allSessions (local), and save to database
     refreshSessionsAndSave() {
         return this.fetchSessions().flatMap((data) => {
             return this.saveSessionList(data);
@@ -366,6 +377,7 @@ export class SessionsService {
         });
     }
 
+    // Get Access Lists from central and save to local
     refreshAccessListsAndSave() {
         const accessControlSessions = this.allSessions.filter((session) => {
             return session.AccessControl;
@@ -382,8 +394,9 @@ export class SessionsService {
         return Observable.forkJoin(accessListRequests);
     }
 
+    // Refresh sessions and access lists, update local props - allSessions, rooms, scheduleStartDate, scheduleEndDate
     refreshSessionsThenAccessLists() {
-        return this.refreshSessionsAndSave().flatMap(() => this.refreshAccessListsAndSave());
+        return this.refreshSessionsAndSave().flatMap(() => this.refreshAccessListsAndSave()).flatMap(() => this.refreshRoomsAndDates());
     }
 
     // Update scheduleStartDate, scheduleEndDate, set filterDate if not yet set
