@@ -2,6 +2,7 @@ import { Component, NgZone } from '@angular/core';
 import { NavController, NavParams, AlertController, ToastController, LoadingController, Events } from 'ionic-angular';
 
 import { ScanCameraService } from '../../providers/scanCameraService';
+import { SessionsService } from '../../providers/sessionsService';
 import { SoundService } from '../../providers/soundService';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 
@@ -13,6 +14,8 @@ const notificationTime = 1000;
 })
 export class ScanCameraPage {
 
+    scannedCount: number = 0;
+
     leaveCameraMsg: boolean = false;
     session = {};
 
@@ -21,6 +24,7 @@ export class ScanCameraPage {
     showDeniedBackground: boolean = false;
 
     constructor(private scanCameraService: ScanCameraService,
+      private sessionsService: SessionsService,
       private zone: NgZone,
       private params: NavParams,
       private events: Events,
@@ -34,9 +38,10 @@ export class ScanCameraPage {
         this.onLineaConnect = this.onLineaConnect.bind(this);
     }
 
-    // Set OnDataRead function and subscribe to onLineaConnect event
-    ionViewWillEnter() {
+    // Set OnDataRead function, get session scan counts, subscribe to onLineaConnect event
+    ionViewWillEnter() {      
       (<any>window).OnDataRead = this.onZoneDataRead.bind(this); 
+      this.getSessionScanCount();
       this.events.subscribe('event:onLineaConnect', this.onLineaConnect);  
     }
 
@@ -73,10 +78,12 @@ export class ScanCameraPage {
               text: "Leave", 
               handler: () => {
                 this.leaveCameraMsg = false;
-                this.navCtrl.push(ScanSledPage, this.session).then(() => {
-                  const idx = this.navCtrl.getActive().index;
-                  this.navCtrl.remove(idx - 1);
-                });
+                this.navCtrl.pop({ animate: false });
+                this.navCtrl.push(ScanSledPage, this.session, {animate: false});
+                // this.navCtrl.push(ScanSledPage, this.session).then(() => {
+                //   const idx = this.navCtrl.getActive().index;
+                //   this.navCtrl.remove(idx - 1);
+                // });
               }
             }
           ]
@@ -201,6 +208,13 @@ export class ScanCameraPage {
       }.bind(this), notificationTime);
     }
 
+    // Get session scan count
+    getSessionScanCount() {
+      this.sessionsService.getCount(this.session['SessionGuid']).subscribe((data) => {      
+        this.scannedCount = data.Count;
+      }, (err) => { });
+    }
+
     // Click Handler - Refresh Access List
     refreshAccessList() {
       this.scanCameraService.turnOff();
@@ -209,16 +223,24 @@ export class ScanCameraPage {
         dismissOnPageChange: true
       });    
       loader.present();
-      // TODO: Faking refresh time
-      setTimeout(() => {
+      this.sessionsService.fetchAccess(this.session['SessionGuid']).subscribe((data) => {
         loader.dismiss();
         this.scanCameraService.turnOn();
         let toast = this.toastCtrl.create({
-          message: "Access lists refreshed!",
+          message: "Access list refreshed!",
           duration: 2500,
           position: 'top'
         });
         toast.present();
-      }, 3000);
+      }, (err) => {
+        loader.dismiss();
+        this.scanCameraService.turnOn();
+        let toast = this.toastCtrl.create({
+          message: "Unable to refresh access list...",
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+      });
     }
 }

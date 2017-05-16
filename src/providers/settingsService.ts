@@ -5,7 +5,7 @@ import { InformationService } from './informationService';
 @Injectable()
 export class SettingsService {
 
-    backgroundUploadWait : Number = 4;
+    backgroundUploadWait : number = 4;
     accessControl : boolean = true;
     accessControlOverride: boolean = true;
     capacityCheck: boolean = false;

@@ -2,7 +2,9 @@ import { Component, NgZone } from '@angular/core';
 import { NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
 
 import { ScanSledService } from '../../providers/scanSledService';
+import { SessionsService } from '../../providers/sessionsService';
 import { SoundService } from '../../providers/soundService';
+import { SettingsService } from '../../providers/settingsService';
 
 const notificationTime = 1000;
 
@@ -11,6 +13,8 @@ const notificationTime = 1000;
   templateUrl: 'scan-sled.html'
 })
 export class ScanSledPage {
+    
+    scannedCount: number = 0;
     session = {};
 
     showAcceptedBackground: boolean = false;
@@ -19,7 +23,9 @@ export class ScanSledPage {
     
     constructor(private params: NavParams,
         private scanSledService: ScanSledService,
+        private sessionsService: SessionsService,
         private soundService: SoundService,
+        private settingsService: SettingsService,
         private zone: NgZone,
         private alertCtrl: AlertController,
         private toastCtrl: ToastController,
@@ -28,8 +34,13 @@ export class ScanSledPage {
       this.session = this.params.data;
     }
 
-    // Bind OnDataRead to this class, enable scan button
+    // Get Session Scan Count
     ionViewWillEnter() {
+      this.getSessionScanCount();
+    }
+
+    // Bind OnDataRead to this class, enable scan button
+    ionViewDidEnter() {
       (<any>window).OnDataRead = this.onZoneDataRead.bind(this);
       this.scanSledService.sendScanCommand('enableButtonScan');
     }
@@ -41,56 +52,146 @@ export class ScanSledPage {
       (<any>window).OnDataRead = function(){};
     }  
 
-    // Zone function that parses badge data
-    onZoneDataRead(data) {
-      // TESTING - show the 3 paths - accepted, denied, denied with prompt
-      const allowed = Math.round(Math.random());
-      const secondCheck = Math.round(Math.random());
+    // Check capacity, parse badge, check access list, check settings, save or deny scan..
+    handleScan(d) {
+      // If capacityCheck is enabled, and current count is >= capacity, block
+      if (this.settingsService.capacityCheck && this.session['Capacity'] && this.session['Capacity'] >= this.scannedCount) {
+        this.soundService.playDenied();
+        this.alertDenied('Session at capacity.');
+        return false;
+      }
+    
+      let scannedData = d[0].Data,
+          symbology = d[0].Symbology,
+          scannedId = null;
 
-      const scannedData = data;
-      //alert(JSON.stringify(data));
-      this.zone.run(() => {
-        this.removeScanClickClass();
-        if (allowed) {
-          if (secondCheck) {
-             this.soundService.playAccepted();
-            this.alertAllowed();
-          } else {
-            this.soundService.playDenied();
-            this.alertDenied();
-          }         
-        } else {
-          this.scanSledService.sendScanCommand('disableButtonScan');
-          let confirm = this.alertCtrl.create({
-            title: 'Not on access list',
-            message: "Allow this attendee into session?",
-            cssClass: 'confirm-entry',
-            buttons: [
-              {
-                text: "Deny",
-                role: 'cancel',
-                cssClass: 'confirm-cancel',                
-                handler: () => {
-                  // Don't allow
-                  this.scanSledService.sendScanCommand('enableButtonScan');
-                  this.soundService.playDenied();
-                  this.alertDenied();
-                }
-              },
-              {
-                text: "Allow",
-                cssClass: 'confirm-allow',
-                handler: () => {
-                  // Allow attendee
-                  this.scanSledService.sendScanCommand('enableButtonScan');
-                  this.soundService.playAccepted();
-                  this.alertAllowed();
+      let checkSymbology = symbology;
+      if (checkSymbology != null) {
+        checkSymbology = checkSymbology.replace(/\s+/g, '').toUpperCase();
+      }
+
+      if (checkSymbology === 'CODE3OF9' || checkSymbology === 'CODE39') {
+        scannedId = scannedData;
+      } else if (checkSymbology === 'QRCODE') {
+        // Test for Validar QR code
+        if (scannedData != null && scannedData.substring(0,4) === 'VQC:') {
+          scannedData = scannedData.substring(4);
+          const scannedFields = scannedData.split(';');
+          if (scannedFields != null) {
+            for (let i = 0; i < scannedFields.length; i++) {
+              const field = scannedFields[i].split(':');
+              if (field != null && field.length > 0) {
+                // Currently ignoring field[0] === 'T' || 'S', not used..
+                if (field[0] === 'ID') {
+                  scannedId = field[1];
                 }
               }
-            ]
-          });
-          confirm.present();
+            }
+          }
+        } else {
+          scannedId = scannedData;
         }
+      } else {
+        this.soundService.playDenied();
+        this.alertDenied(`Not setup to support barcode symbology: ${symbology}`);
+        return false;
+      }
+
+      // Remove extra spaces around id
+      scannedId = scannedId.replace(/^\s+|\s+$/g, '');
+      
+      if (scannedId && scannedId.length < 384) {
+        const newScan = {
+          "SessionGuid": this.session['SessionGuid'],
+          "ScanData": scannedId,
+          "DeviceId": this.settingsService.deviceName,
+          "ScanDateTime": new Date()
+        };
+        // Check for access control
+        if (this.session['AccessControl'] && this.settingsService.accessControl) {
+          this.sessionsService.getAccess(this.session['SessionGuid'], scannedId).subscribe((data) => {
+            if (data.Fault && data.Fault.Type === 'NotFoundFault') {
+              this.soundService.playDenied();              
+              if (this.settingsService.accessControlOverride) {
+                // Create confirmation for allow/deny attendee
+                this.scanSledService.sendScanCommand('disableButtonScan');
+                let confirm = this.alertCtrl.create({
+                  title: 'Not on access list',
+                  message: "Allow this attendee into session?",
+                  cssClass: 'confirm-entry',
+                  buttons: [
+                    {
+                      text: "Deny",
+                      role: 'cancel',
+                      cssClass: 'confirm-cancel',                
+                      handler: () => {
+                        // Don't allow
+                        this.scanSledService.sendScanCommand('enableButtonScan');
+                        //this.soundService.playDenied();
+                        this.alertDenied();
+                      }
+                    },
+                    {
+                      text: "Allow",
+                      cssClass: 'confirm-allow',
+                      handler: () => {
+                        // Allow attendee
+                        this.sessionsService.saveScan(newScan).subscribe((data) => {
+                          this.scanSledService.sendScanCommand('enableButtonScan');
+                          this.soundService.playAccepted();
+                          this.alertAllowed();
+                          this.scannedCount += 1;
+                        }, (err) => {
+                          this.scanSledService.sendScanCommand('enableButtonScan');
+                          //this.soundService.playDenied();
+                          this.alertDenied('There was an issue saving that scan...');
+                        });
+                      }
+                    }
+                  ]
+                });
+                confirm.present();
+              } else {
+                this.alertDenied();
+              }
+            } else {
+              // Allow entry
+              this.sessionsService.saveScan(newScan).subscribe((data) => {
+                this.soundService.playAccepted();
+                this.alertAllowed();
+                this.scannedCount += 1;
+              }, (err) => {
+                this.soundService.playDenied();
+                this.alertDenied('There was an issue saving that scan...');
+              });
+            }
+          }, (err) => {
+            this.soundService.playDenied();
+            this.alertDenied('There was an issue checking access list...');
+          });
+        } else {          
+          this.sessionsService.saveScan(newScan).subscribe((data) => {
+            this.soundService.playAccepted();
+            this.alertAllowed();
+            this.scannedCount += 1;
+          }, (err) => {
+            this.soundService.playDenied();
+            this.alertDenied('There was an issue saving that scan...');
+          });
+        }
+      } else {
+        this.soundService.playDenied();
+        this.alertDenied('Invalid badgeId value');
+        return false;
+      }
+
+    }
+
+    // Zone function that sends badge data to be parsed
+    onZoneDataRead(data) {
+      this.zone.run(() => {
+        this.removeScanClickClass();
+        this.handleScan(data);        
       });
     }
 
@@ -110,9 +211,10 @@ export class ScanSledPage {
     }
 
     // Present a denied toast notification
-    alertDenied() {
+    alertDenied(errorMsg?) {
+      const msg = !errorMsg ? 'Attendee denied access.' : errorMsg;      
       let toast = this.toastCtrl.create({
-        message: "Attendee denied access.",
+        message: msg,
         duration: notificationTime,
         position: 'top',
         cssClass: 'notify-cancel'
@@ -165,6 +267,13 @@ export class ScanSledPage {
       this.session['isLocked'] = false;      
     }
 
+    // Get session scan count
+    getSessionScanCount() {
+      this.sessionsService.getCount(this.session['SessionGuid']).subscribe((data) => {      
+        this.scannedCount = data.Count;
+      }, (err) => { });
+    }
+
     // Click Handler - Refresh access list
     refreshAccessList() {
       let loader = this.loadingCtrl.create({
@@ -172,15 +281,22 @@ export class ScanSledPage {
         dismissOnPageChange: true
       });    
       loader.present();
-      // TODO: Faking refresh time
-      setTimeout(() => {
+      this.sessionsService.fetchAccess(this.session['SessionGuid']).subscribe((data) => {        
         loader.dismiss();
         let toast = this.toastCtrl.create({
-          message: "Access lists refreshed!",
+          message: "Access list refreshed!",
           duration: 2500,
           position: 'top'
         });
         toast.present();
-      }, 3000);
+      }, (err) => {
+        loader.dismiss();
+        let toast = this.toastCtrl.create({
+          message: "Unable to refresh access list...",
+          duration: 2500,
+          position: 'top'
+        });
+        toast.present();
+      });
     }
 }

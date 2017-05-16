@@ -56,8 +56,7 @@ export class SessionDetailPage {
 
   // Get session scan count
   getSessionScanCount() {
-    this.sessionsService.getCount(this.session['SessionGuid']).subscribe((data) => {
-      alert(JSON.stringify(data));
+    this.sessionsService.getCount(this.session['SessionGuid']).subscribe((data) => {      
       this.scannedCount = data.Count;
     }, (err) => { });
   }
@@ -65,7 +64,6 @@ export class SessionDetailPage {
   // Get the access list count
   getAccessListCount() {
     this.sessionsService.getAccessCount(this.session['SessionGuid']).subscribe((data) => {
-      alert(JSON.stringify(data));
       this.accessListCount = data.Count;
     }, (err) => { });
   }

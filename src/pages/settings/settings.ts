@@ -69,8 +69,7 @@ export class SettingsPage {
       dismissOnPageChange: true
     });
     loader.present();
-    // TODO: FAKING SYNC SESSION TIME
-    setTimeout(() => {
+    this.sessionsService.refreshSessionsThenAccessLists().subscribe((data) => {
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: "Finished syncing sessions!",
@@ -78,7 +77,15 @@ export class SettingsPage {
         position: 'top'
       });
       toast.present();
-    }, 2000);
+    }, (err) => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: "Unable to sync sessions at this time...",
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+    });
   }
 
   // Click handler - upload pending scans

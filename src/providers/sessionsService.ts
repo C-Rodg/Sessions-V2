@@ -115,7 +115,7 @@ export class SessionsService {
             if (res.Fault) {
                 alert("Load session access list fault: " + res.Fault.Type);
                 return Observable.throw(res.Fault);
-            } 
+            }             
             return res;
         }).flatMap((res) => {
             return this.saveAccessList(scheduleItemGuid, res);
@@ -178,6 +178,7 @@ export class SessionsService {
         });
     }
 
+    // Save a newly created scan to the local database
     saveScan(scan) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans`, JSON.stringify(scan)).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -205,6 +206,7 @@ export class SessionsService {
         });
     }    
 
+    // Search for sessions - ? location=, category=, startdate=, start=, count=
     searchSessions(options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions?${options}`).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -215,6 +217,7 @@ export class SessionsService {
         });
     }
 
+    // Get the session count
     countSessions(options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/count?${options}`).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -238,7 +241,6 @@ export class SessionsService {
                 if (res.Fault) {
                     return Observable.throw(res.Fault);
                 } else if (res.Session) {
-                    // TODO: PROCESS SESSION and return..
                     return this.convertToDisplaySession(res.Session); // is this just one session? or an array?
                 } else {
                     Observable.throw("Invalid response object returned by the ajax call.");
@@ -472,9 +474,8 @@ export class SessionsService {
             }
             if (session.hasOwnProperty("EndDateTime") && session.EndDateTime !== null) {
                 session.EndDateTime = session.EndDateTime.replace(/Z/, "");
-            }
-
-            const AccessControl = session.Category.toUpperCase() === 'ACCESS CONTROL' ? true : false;
+            }            
+            const AccessControl = session.Category.toUpperCase().replace(/ /g, '') === 'ACCESSCONTROL' ? true : false;
             const start = moment(session.StartDateTime, 'YYYY-MM-DDTHH:mm:ss.SSS');
             const end = moment(session.EndDateTime, 'YYYY-MM-DDTHH:mm:ss.SSS');
             let displayDates = {};
