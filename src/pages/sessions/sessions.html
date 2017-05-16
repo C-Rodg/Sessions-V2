@@ -17,7 +17,7 @@
     </ion-item>
     <ion-item>
       <ion-label>Date:</ion-label>
-      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{scheduleStartDate}}" max="{{scheduleEndDate}}" [(ngModel)]="sessionsService.filterDate"></ion-datetime>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{sessionsService.scheduleStartDate}}" max="{{sessionsService.scheduleEndDate}}" [(ngModel)]="sessionsService.filterDate"></ion-datetime>
     </ion-item>
     <ion-item class="picker">
       <ion-label>Room:</ion-label>

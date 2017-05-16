@@ -2,22 +2,17 @@ import { Component } from '@angular/core';
 import { NavController, PickerController, LoadingController } from 'ionic-angular';
 import { SessionsService } from '../../providers/sessionsService';
 import { SessionDetailPage } from '../session-detail/session-detail'
-import * as moment from 'moment';
 
 @Component({
   selector: 'page-sessions',
   templateUrl: 'sessions.html'
 })
 export class SessionsPage {
-
-  scheduleStartDate: string = "";
-  scheduleEndDate: string = "";
-
-  filterRoom: string = "";
-  roomListOpts: Array<any> = [];
   
+  // Filters for search text and room, date is held in sessionsService
   showSearchFilter: boolean = false;
   filterSearch: string = "";
+  filterRoom: string = "";
   
   constructor(
       public navCtrl: NavController, 
@@ -26,17 +21,6 @@ export class SessionsPage {
       private sessionsService: SessionsService      
     ) { 
   }
-
-  ionViewWillEnter() {
-    this.getRooms();    
-  }
-
-  // Get the unique rooms, generate roomList object
-  getRooms() {
-    this.roomListOpts = [{text: '-None-', value: ''}, ...this.sessionsService.rooms.map((loc) => {
-      return { text: loc, value: loc };
-    })];    
-  }  
 
   // Go to the session detail page
   goToSession(session) {    
@@ -51,6 +35,9 @@ export class SessionsPage {
 
   // Open custom picker, set current room filter
   openFilterRooms() {
+      const pickerRooms =  [{text: '-None-', value: ''}, ...this.sessionsService.rooms.map((loc) => {
+        return { text: loc, value: loc };
+      })];
       let picker = this.pickerCtrl.create();
       picker.addButton({
         text: 'Cancel',
@@ -62,7 +49,7 @@ export class SessionsPage {
             this.filterRoom = data.rooms.value;         
         }
       });
-      const idx = this.roomListOpts.findIndex((el) => {
+      const idx = pickerRooms.findIndex((el) => {
         return el.value === this.filterRoom;
       });
       picker.addColumn({
@@ -70,7 +57,7 @@ export class SessionsPage {
         align: 'center',
         selectedIndex: idx,
         columnWidth: '100%',
-        options: this.roomListOpts
+        options: pickerRooms
       });      
       picker.present();
   }

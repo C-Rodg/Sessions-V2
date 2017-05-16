@@ -277,29 +277,10 @@ export class SessionsService {
                 return Observable.throw("Invalid response object returned by the ajax call.");
             }
         });
-    }
-
-    getCount(sessionGuid, options) {
-        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/scans/count?${options}`).map(res => res.json()).map((res) => {
-            if (res.Fault) {
-                return Observable.throw(res.Fault);
-            }
-            return res;
-        });
-    }
+    }    
 
     getTotalCount(options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/scans/count?${options}`).map(res => res.json()).map((res) => {
-            if (res.Fault) {
-                return Observable.throw(res.Fault);
-            }
-            return res;
-        });
-    }
-
-
-    getAccessCount(sessionGuid) {
-        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/count`).map(res => res.json()).map((res) => {
             if (res.Fault) {
                 return Observable.throw(res.Fault);
             }
@@ -325,6 +306,26 @@ export class SessionsService {
             localStorage.setItem('ActiveSession', JSON.stringify(s));
             this.activeSession = s;
         }
+    }
+
+    // Get total scans for a session: ? distinct=scan/session scandata=<badgeId>
+    getCount(sessionGuid, options?) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/scans/count?${options}`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
+    }
+
+    // Get the number of registrants on access list for a particular session
+    getAccessCount(sessionGuid) {
+        return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/count`).map(res => res.json()).map((res) => {
+            if (res.Fault) {
+                return Observable.throw(res.Fault);
+            }
+            return res;
+        });
     }
 
     // Return an array of unique room locations

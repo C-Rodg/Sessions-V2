@@ -17,10 +17,10 @@ export class SessionDetailPage {
   session = {};
   prevSession = {};
   nextSession = {};
-
-  accessListCount: Number = 84;
-  scannedCount: Number = 237;
-  pendingUploadCount: Number = 28;
+  
+  scannedCount: Number = 0;
+  accessListCount: Number = 0;
+  pendingUploadCount: Number = 0;
 
 
 
@@ -37,12 +37,37 @@ export class SessionDetailPage {
 
   // Convert session to display, determine the Previous and Next Sessions
   ionViewWillEnter() {
+    // Assign session
     this.session = this.params.data;
+    
+    // Get Session Scan count
+    this.getSessionScanCount();
+    
+    // If access control, get access list count
+    if (this.session['AccessControl']) {
+      this.getAccessListCount();
+    }
+
+    // TODO: GET PENDING COUNT 
+
     // Get room list, determine prev/next sessions..
     this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
-    
-    // TODO: Get Upload Counts..
-    // ...      
+  }
+
+  // Get session scan count
+  getSessionScanCount() {
+    this.sessionsService.getCount(this.session['SessionGuid']).subscribe((data) => {
+      alert(JSON.stringify(data));
+      this.scannedCount = data.Count;
+    }, (err) => { });
+  }
+
+  // Get the access list count
+  getAccessListCount() {
+    this.sessionsService.getAccessCount(this.session['SessionGuid']).subscribe((data) => {
+      alert(JSON.stringify(data));
+      this.accessListCount = data.Count;
+    }, (err) => { });
   }
 
   // Search for all sessions in this room, assign prev/next sessions
@@ -89,8 +114,7 @@ export class SessionDetailPage {
       dismissOnPageChange: true
     });    
     loader.present();
-    // TODO: Faking refresh time
-    setTimeout(() => {
+    this.sessionsService.refreshSessionsThenAccessLists().subscribe((data) => {
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: "Access lists refreshed!",
@@ -98,7 +122,15 @@ export class SessionDetailPage {
         position: 'top'
       });
       toast.present();
-    }, 3000);
+    }, (err) => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: "Unable to refresh access lists at this time...",
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+    });
   }
 
   // Show the Popover for pending uploads, next/previous sessions

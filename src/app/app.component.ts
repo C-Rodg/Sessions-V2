@@ -4,7 +4,6 @@ import { Nav,  LoadingController, ToastController, AlertController, MenuControll
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
 import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
-
 import { InformationService } from '../providers/informationService';
 import { SessionsService } from '../providers/sessionsService';
 
@@ -41,7 +40,11 @@ export class MyApp {
     
     // Start up application, if fails just try to set SessionToken, assign allSessions
     this.infoService.startUpApplication().subscribe((data) => {
-      this.sessionsService.startUpSessions().subscribe(d => {});
+      console.log("Successfully started info service");
+      this.sessionsService.startUpSessions().subscribe(d => {
+        console.log("Successfully started up sessions");
+        console.log(d);
+      });
     }, (err) => {
       this.infoService.getAuthToken().subscribe((token) => {
         this.sessionsService.startUpSessions().subscribe((d) => {});
@@ -73,6 +76,16 @@ export class MyApp {
     if (page.icon === 'home' || page.icon === 'settings') {
       this.nav.setRoot(page.component);
     } else if (page.icon === 'refresh') {
+        this.resyncSessions();
+    } else if (page.icon === 'cloud-upload') {
+      this.uploadPendingRecords();
+    } else if (page.icon === 'exit') {
+      window.location.href = "http://localhost/navigate/home";  
+    }
+  }
+
+  // Refresh sessions and access lists
+  resyncSessions() {
       let loader = this.loadingCtrl.create({
         content: 'Syncing Sessions...',
         dismissOnPageChange: true
@@ -94,8 +107,11 @@ export class MyApp {
           position: 'top'
         });
         toast.present();
-      });     
-    } else if (page.icon === 'cloud-upload') {
+      });   
+  }
+
+  // Upload pending records
+  uploadPendingRecords() {
       // TODO: UPLOAD PENDING COUNTS...
       let loader = this.loadingCtrl.create({
         content: `Uploading ${this.pendingUploads} Scans...`,
@@ -121,9 +137,6 @@ export class MyApp {
         toast.present();
         this.pendingUploads = 0;
       });
-    } else if (page.icon === 'exit') {
-      window.location.href = "http://localhost/navigate/home";  
-    }
   }
 
   // Calculate Pending Uploads
