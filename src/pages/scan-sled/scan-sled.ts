@@ -56,7 +56,6 @@ export class ScanSledPage {
 
       // Get room list, determine prev/next sessions..
       this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
-
     }
 
     // Bind OnDataRead to this class, enable scan button
@@ -87,7 +86,7 @@ export class ScanSledPage {
           }
         }
       });
-    }
+    } 
 
     // Helper - get current session index
     getCurrentSessionIndex(arr, guid) {
@@ -171,7 +170,6 @@ export class ScanSledPage {
                       handler: () => {
                         // Don't allow
                         this.scanSledService.sendScanCommand('enableButtonScan');
-                        //this.soundService.playDenied();
                         this.alertDenied();
                       }
                     },
@@ -187,7 +185,6 @@ export class ScanSledPage {
                           this.scannedCount += 1;
                         }, (err) => {
                           this.scanSledService.sendScanCommand('enableButtonScan');
-                          //this.soundService.playDenied();
                           this.alertDenied('There was an issue saving that scan...');
                         });
                       }

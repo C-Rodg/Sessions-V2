@@ -87,5 +87,11 @@ scan-sled {
     .scan-clicked {
         background-color: #e6e6e6;
     }
+
+    .scan-footer {
+        .ac-count {
+            color: red !important;
+        }
+    }
     
 }

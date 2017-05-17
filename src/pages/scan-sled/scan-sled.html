@@ -51,7 +51,7 @@
     <ion-title>{{session.Location}}</ion-title>
     <ion-buttons right>
       <button ion-button icon-only (click)="refreshAccessList()" *ngIf="session.AccessControl" class="m-r-10">
-        {{accessListCount}}<ion-icon name='refresh'></ion-icon>
+        <span class="ac-count">{{accessListCount}}</span><ion-icon name='refresh'></ion-icon>
       </button>
       <button ion-button icon-only (click)="openPasswordModal()">
         <ion-icon name='{{session.isLocked ? "ios-lock" : "ios-unlock-outline"}}'></ion-icon>

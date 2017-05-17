@@ -1,10 +1,11 @@
 import { Component, NgZone } from '@angular/core';
-import { NavController, NavParams, AlertController, ToastController, LoadingController, Events } from 'ionic-angular';
+import { NavController, NavParams, AlertController, ToastController, LoadingController, Events, PopoverController } from 'ionic-angular';
 
 import { ScanCameraService } from '../../providers/scanCameraService';
 import { SessionsService } from '../../providers/sessionsService';
 import { SoundService } from '../../providers/soundService';
 import { ScanSledPage } from '../scan-sled/scan-sled';
+import { MoreInfoPopover } from '../more-info-popover/more-info';
 
 const notificationTime = 1000;
 
@@ -14,16 +15,23 @@ const notificationTime = 1000;
 })
 export class ScanCameraPage {
 
+    pendingUploadCount: number = 0;
     scannedCount: number = 0;
+    accessListCount: number = 0;
+    session = {};
+    prevSession = {};
+    nextSession = {};
+    orderedSessions: Array<any> = [];
 
     leaveCameraMsg: boolean = false;
-    session = {};
+    
 
     openPassword: boolean = false;
     showAcceptedBackground: boolean = false;
     showDeniedBackground: boolean = false;
 
-    constructor(private scanCameraService: ScanCameraService,
+    constructor(
+      private scanCameraService: ScanCameraService,
       private sessionsService: SessionsService,
       private zone: NgZone,
       private params: NavParams,
@@ -32,6 +40,7 @@ export class ScanCameraPage {
       private toastCtrl: ToastController,
       private soundService: SoundService,
       private loadingCtrl: LoadingController,
+      private popoverCtrl: PopoverController,
       private navCtrl: NavController
     ) {
         this.session = this.params.data;
@@ -40,9 +49,19 @@ export class ScanCameraPage {
 
     // Set OnDataRead function, get session scan counts, subscribe to onLineaConnect event
     ionViewWillEnter() {      
-      (<any>window).OnDataRead = this.onZoneDataRead.bind(this); 
-      this.getSessionScanCount();
+      (<any>window).OnDataRead = this.onZoneDataRead.bind(this);       
       this.events.subscribe('event:onLineaConnect', this.onLineaConnect);  
+
+      // Get Session Scan counts
+      this.getSessionScanCount();
+
+      // If access control, get access list count
+      if (this.session['AccessControl']) {
+        this.getAccessListCount();
+      }
+
+      // Get room list, determine prev/next sessions..
+      this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
     }
 
     // Calculate position and then turn on camera
@@ -80,10 +99,6 @@ export class ScanCameraPage {
                 this.leaveCameraMsg = false;
                 this.navCtrl.pop({ animate: false });
                 this.navCtrl.push(ScanSledPage, this.session, {animate: false});
-                // this.navCtrl.push(ScanSledPage, this.session).then(() => {
-                //   const idx = this.navCtrl.getActive().index;
-                //   this.navCtrl.remove(idx - 1);
-                // });
               }
             }
           ]
@@ -144,10 +159,10 @@ export class ScanCameraPage {
       });      
     }
 
-    // Toggle Torch On/Off
-    toggleLight() {
-      this.scanCameraService.toggleTorch();
-    }
+    // Toggle Torch On/Off -- NOT IMPLEMENTED WITH AVE-SESSIONS
+    // toggleLight() {
+    //   this.scanCameraService.toggleTorch();
+    // }
 
     // Turn Front/Back camera
     toggleCamera() {
@@ -213,6 +228,62 @@ export class ScanCameraPage {
       this.sessionsService.getCount(this.session['SessionGuid']).subscribe((data) => {      
         this.scannedCount = data.Count;
       }, (err) => { });
+    }
+
+    // Get the access list count
+    getAccessListCount() {
+      this.sessionsService.getAccessCount(this.session['SessionGuid']).subscribe((data) => {
+        this.accessListCount = data.Count;
+      }, (err) => { });
+    }
+
+    // Search for all sessions in this room, assign prev/next sessions
+    determineSessionOrder(room, guid) {
+      const q = room ? `location=${room}` : '';
+      this.sessionsService.searchSessions(q).subscribe((data) => {
+        this.orderedSessions = data;
+        const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, guid);
+        if (currentSessionIndex > -1) {
+          if (currentSessionIndex !== 0) {
+            this.prevSession = this.orderedSessions[currentSessionIndex - 1];
+          }
+          if (currentSessionIndex !== this.orderedSessions.length - 1) {
+            this.nextSession = this.orderedSessions[currentSessionIndex + 1];
+          }
+        }
+      });
+    }
+
+    // Helper - get current session index
+    getCurrentSessionIndex(arr, guid) {
+      return arr.findIndex((sess) => {
+        return sess.SessionGuid === guid;
+      });
+    }
+
+    // Show more info popover
+    showPopover(ev) {
+      this.scanCameraService.turnOff();
+      const sessionDetails = {
+        totalPending: this.pendingUploadCount,
+        nextSession: this.nextSession,
+        prevSession: this.prevSession,
+        isLocked: this.session['isLocked']
+      };
+      let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
+      pop.present({ ev });
+      pop.onDidDismiss((data) => {
+        this.scanCameraService.turnOff();
+        if (data === 'next' || data === 'prev') {
+          let sess = data === 'next' ? this.nextSession : this.prevSession;
+          sess['isLocked'] = this.session['isLocked'] ? true : false;
+          const dir = data === 'next' ? 'forward' : 'back';
+          this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
+            const idx = this.navCtrl.getActive().index;
+            this.navCtrl.remove(idx - 1);
+          });
+        }
+      });
     }
 
     // Click Handler - Refresh Access List
