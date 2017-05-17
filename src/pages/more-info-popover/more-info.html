@@ -10,7 +10,7 @@
                 </ion-row>
             </button>
 
-            <button ion-item class="pop-item" (tap)="goToSession('prev')" *ngIf="prevSession.Topic">
+            <button ion-item class="pop-item" (tap)="goToSession('prev')" *ngIf="prevSession.Topic  && !locked">
                 <ion-row>                
                     <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-back"></ion-icon></ion-col>
                     <ion-col class="pop__data">
@@ -22,7 +22,7 @@
                 </ion-row>
             </button>
 
-            <button ion-item class="pop-item" (tap)="goToSession('next')" *ngIf="nextSession.Topic">
+            <button ion-item class="pop-item" (tap)="goToSession('next')" *ngIf="nextSession.Topic && !locked">
                 <ion-row>                
                     <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-forward"></ion-icon></ion-col>
                     <ion-col class="pop__data">

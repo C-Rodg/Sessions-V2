@@ -356,13 +356,15 @@ export class ScanSledPage {
       const sessionDetails = {
         totalPending: this.pendingUploadCount,
         nextSession: this.nextSession,
-        prevSession: this.prevSession      
+        prevSession: this.prevSession,
+        isLocked: this.session['isLocked']
       };
       let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
       pop.present({ ev });
       pop.onDidDismiss((data) => {
         if (data === 'next' || data === 'prev') {
-          const sess = data === 'next' ? this.nextSession : this.prevSession;
+          let sess = data === 'next' ? this.nextSession : this.prevSession;
+          sess['isLocked'] = this.session['isLocked'] ? true : false;
           const dir = data === 'next' ? 'forward' : 'back';
           this.navCtrl.push(ScanSledPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
             const idx = this.navCtrl.getActive().index;

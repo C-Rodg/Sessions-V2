@@ -6,9 +6,10 @@ import { NavParams, LoadingController, ToastController, ViewController } from 'i
   templateUrl: 'more-info.html'
 })
 export class MoreInfoPopover {
-  pendingCount: Number = 32;
+  pendingCount: number = 0;
   prevSession: any = {};
-  nextSession: any = {};    
+  nextSession: any = {}; 
+  locked: boolean = false;   
 
   constructor(private navParams: NavParams,
       private toastCtrl: ToastController,
@@ -25,6 +26,7 @@ export class MoreInfoPopover {
       this.prevSession = d.prevSession;
       this.nextSession = d.nextSession;
       this.pendingCount = d.totalPending;
+      this.locked = d.isLocked;
     }
   }
   
