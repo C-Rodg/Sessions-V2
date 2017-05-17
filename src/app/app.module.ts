@@ -6,7 +6,6 @@ import { HttpModule } from '@angular/http';
 import { MyApp } from './app.component';
 import { SessionsPage } from '../pages/sessions/sessions';
 import { SettingsPage } from '../pages/settings/settings';
-import { SessionDetailPage } from '../pages/session-detail/session-detail';
 import { ScanSledPage } from '../pages/scan-sled/scan-sled';
 import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 import { PasswordPrompt } from '../pages/password-prompt/password-prompt';
@@ -19,7 +18,7 @@ import { SessionsService } from '../providers/sessionsService';
 import { SettingsService } from '../providers/settingsService';
 
 import { DeviceModal } from '../pages/settings/device-modal/device-modal';
-import { MoreInfoPopover } from '../pages/session-detail/more-info/more-info';
+import { MoreInfoPopover } from '../pages/more-info-popover/more-info';
 
 import { FilterDates } from '../pipes/FilterDates';
 import { FilterRooms } from '../pipes/FilterRooms';
@@ -30,7 +29,6 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     MyApp,
     SessionsPage,
     SettingsPage,
-    SessionDetailPage,
     FilterDates,
     FilterRooms,
     FilterSessionText,
@@ -53,7 +51,6 @@ import { FilterSessionText } from '../pipes/FilterSessionText';
     MyApp,
     SessionsPage,
     SettingsPage,
-    SessionDetailPage,
     DeviceModal,
     MoreInfoPopover,
     ScanSledPage,

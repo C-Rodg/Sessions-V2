@@ -1,0 +1,47 @@
+more-info-popover {
+    .pop-item {
+        padding-left: 0;
+
+        ion-row {
+            flex-wrap: nowrap;
+        }
+
+        .item-inner {
+            padding-right: 0 !important;
+        }
+
+        .pop__icon {
+            align-self: center;
+            text-align: center;
+            padding-left: 0;
+            padding-right: 0;
+
+            ion-icon {                
+                font-size: 1.5em;
+                min-width: 28px;
+            }
+        }
+
+        .pop__data {            
+
+            .control {
+                font-weight: bold;
+            }
+
+            .title {
+                padding-top: 4px;
+                padding-bottom: 4px;
+                font-style: italic;
+                white-space: normal;
+            }
+
+            .date {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .more-info-popover {
+        margin-bottom: 0;
+    }
+}

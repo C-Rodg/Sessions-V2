@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { NavController, PickerController, LoadingController } from 'ionic-angular';
 import { SessionsService } from '../../providers/sessionsService';
-import { SessionDetailPage } from '../session-detail/session-detail'
+import { InformationService } from '../../providers/informationService';
+import { ScanCameraPage } from '../scan-camera/scan-camera';
+import { ScanSledPage } from '../scan-sled/scan-sled';
 
 @Component({
   selector: 'page-sessions',
@@ -18,13 +20,22 @@ export class SessionsPage {
       public navCtrl: NavController, 
       private pickerCtrl: PickerController,
       private loadingCtrl: LoadingController,
-      private sessionsService: SessionsService      
+      private sessionsService: SessionsService,
+      private infoService: InformationService    
     ) { 
   }
 
   // Go to the session detail page
-  goToSession(session) {    
-    this.navCtrl.push(SessionDetailPage, session);
+  goToSession(session) {
+    this.infoService.getClientInfo().subscribe((data) => {
+      if (this.infoService.getLineaStatus()) {
+        this.navCtrl.push(ScanSledPage, session);
+      } else {
+        this.navCtrl.push(ScanCameraPage, session);
+      }
+    }, (err) => {
+      this.navCtrl.push(ScanCameraPage, session);
+    });
   }
 
   // Toggle showing of search filter

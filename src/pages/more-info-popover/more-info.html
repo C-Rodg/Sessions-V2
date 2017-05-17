@@ -1,0 +1,39 @@
+<ion-list class="more-info-popover">               
+
+            <button class="pop-item" ion-item (tap)="uploadPending()">
+                <ion-row>
+                    <ion-col class="pop__icon" col-2><ion-icon name="cloud-upload"></ion-icon></ion-col>
+                    <ion-col class="pop__data">
+                        <div class="control">Pending Uploads:</div>
+                        <div>{{pendingCount}} scans</div>
+                    </ion-col>
+                </ion-row>
+            </button>
+
+            <button ion-item class="pop-item" (tap)="goToSession('prev')" *ngIf="prevSession.Topic">
+                <ion-row>                
+                    <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-back"></ion-icon></ion-col>
+                    <ion-col class="pop__data">
+                        <div class="control">Previous Session:</div>
+                        <div class="title">{{prevSession.Topic}}</div>
+                        <div class="date">{{prevSession.DisplayStartDate}}</div>
+                        <div class="time">{{prevSession.StartTime}}</div>
+                    </ion-col>                
+                </ion-row>
+            </button>
+
+            <button ion-item class="pop-item" (tap)="goToSession('next')" *ngIf="nextSession.Topic">
+                <ion-row>                
+                    <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-forward"></ion-icon></ion-col>
+                    <ion-col class="pop__data">
+                        <div class="control">Next Session:</div>
+                        <div class="title">{{nextSession.Topic}}</div>
+                        <div class="date">{{nextSession.DisplayStartDate}}</div>
+                        <div class="time">{{nextSession.StartTime}}</div>
+                    </ion-col>                
+                </ion-row>
+            </button>
+</ion-list>
+
+<div>
+    

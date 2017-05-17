@@ -1,10 +1,11 @@
 import { Component, NgZone } from '@angular/core';
-import { NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
+import { NavController, NavParams, AlertController, ToastController, LoadingController, PopoverController } from 'ionic-angular';
 
 import { ScanSledService } from '../../providers/scanSledService';
 import { SessionsService } from '../../providers/sessionsService';
 import { SoundService } from '../../providers/soundService';
 import { SettingsService } from '../../providers/settingsService';
+import { MoreInfoPopover } from '../more-info-popover/more-info';
 
 const notificationTime = 1000;
 
@@ -14,19 +15,27 @@ const notificationTime = 1000;
 })
 export class ScanSledPage {
     
+    pendingUploadCount: number = 0;
     scannedCount: number = 0;
+    accessListCount: number = 0;
     session = {};
+    prevSession = {};
+    nextSession = {};
+    orderedSessions: Array<any> = [];
 
     showAcceptedBackground: boolean = false;
     showDeniedBackground: boolean = false;
     openPassword: boolean = false;
     
-    constructor(private params: NavParams,
+    constructor(
         private scanSledService: ScanSledService,
         private sessionsService: SessionsService,
         private soundService: SoundService,
         private settingsService: SettingsService,
+        private navCtrl: NavController,
+        private params: NavParams,
         private zone: NgZone,
+        private popoverCtrl: PopoverController,
         private alertCtrl: AlertController,
         private toastCtrl: ToastController,
         private loadingCtrl: LoadingController
@@ -34,9 +43,20 @@ export class ScanSledPage {
       this.session = this.params.data;
     }
 
-    // Get Session Scan Count
     ionViewWillEnter() {
+      // Get session scan count
       this.getSessionScanCount();
+
+      // If access control, get access list count
+      if (this.session['AccessControl']) {
+        this.getAccessListCount();
+      }
+
+      // TODO: GET PENDING COUNT 
+
+      // Get room list, determine prev/next sessions..
+      this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
+
     }
 
     // Bind OnDataRead to this class, enable scan button
@@ -51,6 +71,30 @@ export class ScanSledPage {
       this.scanSledService.sendScanCommand('disableButtonScan');
       (<any>window).OnDataRead = function(){};
     }  
+
+    // Search for all sessions in this room, assign prev/next sessions
+    determineSessionOrder(room, guid) {
+      const q = room ? `location=${room}` : '';
+      this.sessionsService.searchSessions(q).subscribe((data) => {
+        this.orderedSessions = data;
+        const currentSessionIndex = this.getCurrentSessionIndex(this.orderedSessions, guid);
+        if (currentSessionIndex > -1) {
+          if (currentSessionIndex !== 0) {
+            this.prevSession = this.orderedSessions[currentSessionIndex - 1];
+          }
+          if (currentSessionIndex !== this.orderedSessions.length - 1) {
+            this.nextSession = this.orderedSessions[currentSessionIndex + 1];
+          }
+        }
+      });
+    }
+
+    // Helper - get current session index
+    getCurrentSessionIndex(arr, guid) {
+      return arr.findIndex((sess) => {
+        return sess.SessionGuid === guid;
+      });
+    }
 
     // Check capacity, parse badge, check access list, check settings, save or deny scan..
     handleScan(d) {
@@ -274,6 +318,13 @@ export class ScanSledPage {
       }, (err) => { });
     }
 
+    // Get the access list count
+    getAccessListCount() {
+      this.sessionsService.getAccessCount(this.session['SessionGuid']).subscribe((data) => {
+        this.accessListCount = data.Count;
+      }, (err) => { });
+    }
+
     // Click Handler - Refresh access list
     refreshAccessList() {
       let loader = this.loadingCtrl.create({
@@ -297,6 +348,27 @@ export class ScanSledPage {
           position: 'top'
         });
         toast.present();
+      });
+    }
+
+    // Show Popover more info
+    showPopover(ev) {
+      const sessionDetails = {
+        totalPending: this.pendingUploadCount,
+        nextSession: this.nextSession,
+        prevSession: this.prevSession      
+      };
+      let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
+      pop.present({ ev });
+      pop.onDidDismiss((data) => {
+        if (data === 'next' || data === 'prev') {
+          const sess = data === 'next' ? this.nextSession : this.prevSession;
+          const dir = data === 'next' ? 'forward' : 'back';
+          this.navCtrl.push(ScanSledPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
+            const idx = this.navCtrl.getActive().index;
+            this.navCtrl.remove(idx - 1);
+          });
+        }
       });
     }
 }
