@@ -16,7 +16,7 @@ export class MyApp {
   rootPage: any = SessionsPage;
 
   pages: Array<{title: string, component: any, icon: string}>;
-  pendingUploads : number = 23;
+  pendingUploads : number = 0;
 
   constructor(
         private loadingCtrl: LoadingController,
@@ -138,6 +138,10 @@ export class MyApp {
 
   // Calculate Pending Uploads
   getPendingUploads() {
-    // TODO: get pending uploads, may need to run in zone to get view to recognize updated count...
+    this.sessionsService.getTotalCount('uploaded=no&error=no').subscribe((data) => {
+      this.zone.run(()=> {
+        this.pendingUploads = data.Count;
+      });      
+    });
   }
 }

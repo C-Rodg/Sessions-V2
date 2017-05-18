@@ -208,7 +208,7 @@ export class ScanSledPage {
             }
           }, (err) => {
             this.soundService.playDenied();
-            this.alertDenied('There was an issue checking access list...');
+            this.alertDenied('There was an issue checking the access list...');
           });
         } else {          
           this.sessionsService.saveScan(newScan).subscribe((data) => {

@@ -169,7 +169,61 @@ export class ScanCameraPage {
             "ScanDateTime": new Date()
           };
           if (this.session["AccessControl"] && this.settingsService.accessControl) {
-            // START HERE...
+            this.sessionsService.getAccess(this.session['SessionGuid'], scannedId).subscribe((data) => {
+              if (data.Fault && data.Fault.Type === 'NotFoundFault') {
+                this.soundService.playDenied();
+                if (this.settingsService.accessControlOverride) {
+                  // Create confirmation for allow deny attendee
+                  let confirm = this.alertCtrl.create({
+                    title: 'Not on access list',
+                    message: 'Allow this attendee into session?',
+                    cssClass: 'confirm-entry',
+                    buttons: [
+                      {
+                        text: 'Deny',
+                        role: 'cancel',
+                        handler: () => {
+                          this.scanCameraService.turnOn();
+                          this.alertDenied();
+                        }
+                      },
+                      {
+                        text: "Allow",
+                        cssClass: 'confirm-allow',
+                        handler: () => {
+                          this.sessionsService.saveScan(newScan).subscribe((data) => {
+                            this.soundService.playAccepted();
+                            this.scanCameraService.turnOn();
+                            this.alertAllowed();
+                            this.scannedCount += 1;
+                          }, (err) => {
+                            this.scanCameraService.turnOn();
+                            this.alertDenied("There was an issue saving that scan...");
+                          });
+                        }
+                      }
+                    ]
+                  });
+                  this.scanCameraService.turnOff();
+                  confirm.present();
+                } else {
+                  this.alertDenied();
+                }
+              } else {
+                // Allow entry
+                this.sessionsService.saveScan(newScan).subscribe((data) => {
+                  this.soundService.playAccepted();
+                  this.alertAllowed();
+                  this.scannedCount += 1;
+                }, (err) => {
+                  this.soundService.playDenied();
+                  this.alertDenied("There was an issue saving that scan...");
+                });
+              }
+            }, (err) => {
+              this.soundService.playDenied();
+              this.alertDenied('There was an issue checking the access list...');
+            })
           } else {
             this.sessionsService.saveScan(newScan).subscribe((data) => {
               this.soundService.playAccepted();
@@ -193,54 +247,7 @@ export class ScanCameraPage {
       this.zone.run(() => {
         this.handleScan(data);
       });
-      
-       // TESTING to show 3 different routes - accepted, denied, denied with prompt...
-      const allowed = Math.round(Math.random());
-      const secondCheck = Math.round(Math.random());
-
-      const scannedDate = data;
-      this.zone.run(() => {        
-        if (allowed) {
-          if (secondCheck) {
-            this.soundService.playAccepted();
-            this.alertAllowed();
-          } else {
-            this.soundService.playDenied();
-            this.alertDenied();
-          }          
-        } else {
-          this.scanCameraService.turnOff();
-          let confirm = this.alertCtrl.create({
-            title: 'Not on access list',
-            message: "Allow this attendee into session?",
-            cssClass: 'confirm-entry',
-            buttons: [
-              {
-                text: "Deny",
-                role: 'cancel',
-                cssClass: 'confirm-cancel',                
-                handler: () => {
-                  // Don't allow
-                  this.soundService.playDenied();
-                  this.scanCameraService.turnOn();
-                  this.alertDenied();
-                }
-              },
-              {
-                text: "Allow",
-                cssClass: 'confirm-allow',
-                handler: () => {
-                  // Allow attendee
-                  this.soundService.playAccepted();
-                  this.scanCameraService.turnOn();
-                  this.alertAllowed();
-                }
-              }
-            ]
-          });
-          confirm.present();
-        }
-      });      
+              
     }
 
     // Toggle Torch On/Off -- NOT IMPLEMENTED WITH AVE-SESSIONS

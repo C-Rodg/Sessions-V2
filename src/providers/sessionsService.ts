@@ -22,9 +22,7 @@ export class SessionsService {
     scheduleEndDate: string = "";
     rooms: any = [];
 
-    constructor(private http: Http, private infoService: InformationService) { 
-        this.activeSession = localStorage.getItem('ActiveSession');
-    }
+    constructor(private http: Http, private infoService: InformationService) { }
 
     // Assign props - allSessions, scheduleStartDate, scheduleEndDate, filterDate, and rooms
     startUpSessions() {
@@ -281,6 +279,7 @@ export class SessionsService {
         });
     }    
 
+    // Get total scans for a device
     getTotalCount(options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/scans/count?${options}`).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -288,26 +287,6 @@ export class SessionsService {
             }
             return res;
         });
-    }
-
-    getActive() {   // TODO: PARSE OUT ACTIVE SESSION FROM JSON?
-        if (this.activeSession) {
-            return this.activeSession;
-        } else {
-            this.activeSession = localStorage.getItem('ActiveSession');
-            if (this.activeSession) {
-                return this.activeSession;
-            } else {
-                return false;
-            }
-        }
-    }
-
-    setActive(s) {
-        if (s) {
-            localStorage.setItem('ActiveSession', JSON.stringify(s));
-            this.activeSession = s;
-        }
     }
 
     // Get total scans for a session: ? distinct=scan/session scandata=<badgeId>

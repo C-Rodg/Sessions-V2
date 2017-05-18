@@ -20,7 +20,7 @@ export class SettingsPage {
     cameraBack: "checkmark"
   };
   
-  pendingUploads: Number = 18;
+  pendingUploads: number = 0;
 
   constructor(public navCtrl: NavController,
       private toastCtrl: ToastController,
@@ -39,7 +39,9 @@ export class SettingsPage {
     this.infoService.getClientInfo().subscribe(this.buildAboutSection);
     this.events.subscribe('event:onLineaConnect', this.buildAboutSection);
 
-    // TODO: GET PENDING UPLOADS
+    this.sessionsService.getTotalCount('uploaded=no&error=no').subscribe((data) => {
+      this.pendingUploads = data.Count;     
+    });
   }
 
   // Unsubscribe from events
@@ -95,7 +97,6 @@ export class SettingsPage {
       dismissOnPageChange: true
     });
     loader.present();
-    // TODO: FAKING UPLOAD SCANS TIME
     setTimeout(() => {
       loader.dismiss();
       let toast = this.toastCtrl.create({
