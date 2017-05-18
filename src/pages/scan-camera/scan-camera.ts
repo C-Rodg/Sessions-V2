@@ -276,31 +276,27 @@ export class ScanCameraPage {
       };
       let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
       pop.present({ ev });
-      pop.onDidDismiss((data) => {        
-        if (data === 'next' || data === 'prev') {
-          let sess = data === 'next' ? this.nextSession : this.prevSession;
+      pop.onDidDismiss((data) => {  
+        if (data === 'next') {
+          let sess = this.nextSession;
           sess['isLocked'] = this.session['isLocked'] ? true : false;
-          const dir = data === 'next' ? 'forward' : 'back';
-          // this.navCtrl.popToRoot({ animate: false }).then(() => {
-          //   this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition' });
-          // });
-          console.log("POPOVER DISMISSED");
-          this.navCtrl.pop({animate: false}).then(() => {
-            console.log("POPPED SCAN PAGE");
-            this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition' }).then(() => {
-              console.log("PUSHED NEW SCAN PAGE");
-            });
+          const currentPageIdx = this.navCtrl.getActive().index;
+          this.navCtrl.remove(currentPageIdx, 1).then(() => {
+            this.navCtrl.push(ScanCameraPage, sess).then(() => console.log(this.navCtrl.getActive().index));
+          });          
+          return false;
+        } else if (data === 'prev') {
+          let sess = this.prevSession;
+          sess['isLocked'] = this.session['isLocked'] ? true : false;
+          const currentPageIdx = this.navCtrl.getActive().index;
+          this.navCtrl.remove(currentPageIdx, 1).then(() => {            
+            this.navCtrl.insert(1, ScanCameraPage, sess).then(() => console.log(this.navCtrl.getActive().index));
           });
-          
-          // this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
-          //   const idx = this.navCtrl.getActive().index;
-          //   this.navCtrl.remove(idx - 1).then(() => {
-          //     this.scanCameraService.turnOn();
-          //   });
-          // });
+          return false;
         } else {
           this.scanCameraService.turnOn();
-        }
+          return false;
+        }                        
       });
     }
 
