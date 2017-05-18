@@ -1,10 +1,14 @@
-page-sessions {
-    .content-md {
-        background-color: #e5e5e5;
-    } 
-    
-    .search-open {
-        margin-top: 60px;
+page-sessions {        
+    .sessions-wrapper {
+        height: 100vh;
+        padding-top: 156px;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+        background-color: #e5e5e5;    
+    }
+
+    .sessions-wrapper.search-open {
+        padding-top: 200px;
     }
 
     .picker {

@@ -62,7 +62,7 @@ export class ScanSledPage {
     ionViewDidEnter() {
       (<any>window).OnDataRead = this.onZoneDataRead.bind(this);
       this.scanSledService.sendScanCommand('enableButtonScan');
-    }
+    } 
 
     // Disable button scan on leaving, disable OnDataRead function
     ionViewWillLeave() {

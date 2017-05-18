@@ -47,11 +47,9 @@ export class ScanCameraPage {
         this.onLineaConnect = this.onLineaConnect.bind(this);
     }
 
-    // Set OnDataRead function, get session scan counts, subscribe to onLineaConnect event
-    ionViewWillEnter() {      
-      (<any>window).OnDataRead = this.onZoneDataRead.bind(this);       
-      this.events.subscribe('event:onLineaConnect', this.onLineaConnect);  
-
+    // Get session scan counts, access list counts, determine prev/next sessions
+    ionViewWillEnter() {             
+      console.log("Entering scan-camera");
       // Get Session Scan counts
       this.getSessionScanCount();
 
@@ -64,14 +62,20 @@ export class ScanCameraPage {
       this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
     }
 
-    // Calculate position and then turn on camera
+    // Set OnDataRead, subscribe to onLineaConnect, calculate position and then turn on camera
     ionViewDidEnter() {
+      console.log("DidEnter scan-camera");
+      //alert("IONVIEWDIDENTER!");
+      (<any>window).OnDataRead = this.onZoneDataRead.bind(this);       
+      this.events.subscribe('event:onLineaConnect', this.onLineaConnect);       
       this.scanCameraService.calculatePosition();
       this.scanCameraService.turnOn();
     }
 
     // Shut off camera on leaving, disallow scanning, unsubscribe from events
-    ionViewWillLeave() {    
+    ionViewWillLeave() { 
+      console.log("WillLeave scan-camera");
+      //alert("IONVIEWWILLLEAVE...");   
       this.scanCameraService.turnOff();
       (<any>window).OnDataRead = function(){};
       this.events.unsubscribe('event:onLineaConnect', this.onLineaConnect);
@@ -272,16 +276,30 @@ export class ScanCameraPage {
       };
       let pop = this.popoverCtrl.create(MoreInfoPopover, sessionDetails);
       pop.present({ ev });
-      pop.onDidDismiss((data) => {
-        this.scanCameraService.turnOff();
+      pop.onDidDismiss((data) => {        
         if (data === 'next' || data === 'prev') {
           let sess = data === 'next' ? this.nextSession : this.prevSession;
           sess['isLocked'] = this.session['isLocked'] ? true : false;
           const dir = data === 'next' ? 'forward' : 'back';
-          this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
-            const idx = this.navCtrl.getActive().index;
-            this.navCtrl.remove(idx - 1);
+          // this.navCtrl.popToRoot({ animate: false }).then(() => {
+          //   this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition' });
+          // });
+          console.log("POPOVER DISMISSED");
+          this.navCtrl.pop({animate: false}).then(() => {
+            console.log("POPPED SCAN PAGE");
+            this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition' }).then(() => {
+              console.log("PUSHED NEW SCAN PAGE");
+            });
           });
+          
+          // this.navCtrl.push(ScanCameraPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
+          //   const idx = this.navCtrl.getActive().index;
+          //   this.navCtrl.remove(idx - 1).then(() => {
+          //     this.scanCameraService.turnOn();
+          //   });
+          // });
+        } else {
+          this.scanCameraService.turnOn();
         }
       });
     }

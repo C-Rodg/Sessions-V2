@@ -29,7 +29,9 @@
   </ion-toolbar>
 </ion-header>
 
-<div class="{{showSearchFilter ? 'search-open sessions-wrapper' : 'sessions-wrapper'}}">
+<!--<div class="{{showSearchFilter ? 'search-open content-box' : 'content-box'}}">-->
+<ion-content>
+    <ion-scroll scrollY="true">
     <div *ngFor="let session of (sessionsService.allSessions | filterDates:sessionsService.filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
       <ion-card tappable (tap)="goToSession(session)">
         <ion-list no-lines class="list__session">
@@ -42,5 +44,7 @@
         </ion-list>
       </ion-card>
     </div>
-</div>
-
+    </ion-scroll>
+  
+</ion-content>
+<!--</div>-->
