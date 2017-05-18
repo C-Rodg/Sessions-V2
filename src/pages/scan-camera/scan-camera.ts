@@ -3,6 +3,7 @@ import { NavController, NavParams, AlertController, ToastController, LoadingCont
 
 import { ScanCameraService } from '../../providers/scanCameraService';
 import { SessionsService } from '../../providers/sessionsService';
+import { SettingsService } from '../../providers/settingsService';
 import { SoundService } from '../../providers/soundService';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 import { MoreInfoPopover } from '../more-info-popover/more-info';
@@ -33,6 +34,7 @@ export class ScanCameraPage {
     constructor(
       private scanCameraService: ScanCameraService,
       private sessionsService: SessionsService,
+      private settingsService: SettingsService,
       private zone: NgZone,
       private params: NavParams,
       private events: Events,
@@ -111,8 +113,86 @@ export class ScanCameraPage {
       }
     }
 
+    // Handle Scanning functionality for onDataRead
+    handleScan(d) {
+      // if capacityCheck is enabled and current count >= capacity, block
+      if (this.settingsService.capacityCheck && this.session['Capacity'] && this.session['Capacity'] >= this.scannedCount) {
+        this.soundService.playDenied();
+        this.alertDenied('Session at capacity.');
+        return false;
+      }
+
+      let scannedData = d[0].Data,
+          symbology = d[0].Symbology,
+          scannedId = null;
+
+        let checkSymbology = symbology;
+        if (checkSymbology != null) {
+          checkSymbology = checkSymbology.replace(/\s+/g, '').toUpperCase();
+        }
+
+        if (checkSymbology === 'CODE3OF9' || checkSymbology === 'CODE39') {
+          scannedId = scannedData;
+        } else if (checkSymbology === 'QRCODE') {
+          // Test for Validar QR code
+          if (scannedData != null && scannedData.substring(0,4) === 'VQC:') {
+            scannedData = scannedData.substring(4);
+            const scannedFields = scannedData.split(';');
+            if (scannedFields != null) {
+              for (let i = 0; i < scannedFields.length; i++) {
+                const field = scannedFields[i].split(':');
+                if (field != null && field.length > 0) {
+                  // Currently ignoring field[0] === 'T' || 'S'...
+                  if (field[0] === 'ID') {
+                    scannedId = field[1];
+                  }
+                }
+              }
+            }
+          } else {
+            scannedId = scannedData;
+          }
+        } else {
+          this.soundService.playDenied();
+          this.alertDenied(`Not setup to support barcode symbology: ${symbology}`);
+          return false;
+        }
+
+        // Remove extra spaces around ID
+        scannedId = scannedId.replace(/^\s+|\s+$/g, '');
+
+        if (scannedId && scannedId.length < 384) {
+          const newScan = {
+            "SessionGuid": this.session["SessionGuid"],
+            "ScanData": scannedId,
+            "DeviceId": this.settingsService.deviceName,
+            "ScanDateTime": new Date()
+          };
+          if (this.session["AccessControl"] && this.settingsService.accessControl) {
+            // START HERE...
+          } else {
+            this.sessionsService.saveScan(newScan).subscribe((data) => {
+              this.soundService.playAccepted();
+              this.alertAllowed();
+              this.scannedCount += 1;
+            }, (err) => {
+              this.soundService.playDenied();
+              this.alertDenied("There was an issue saving that scan...");
+            });
+          }
+        } else {
+          this.soundService.playDenied();
+          this.alertDenied('Invalid badgeId value');
+          return false;
+        }
+    }
+
     // Zone function that runs window.OnDataRead
     onZoneDataRead(data) {
+
+      this.zone.run(() => {
+        this.handleScan(data);
+      });
       
        // TESTING to show 3 different routes - accepted, denied, denied with prompt...
       const allowed = Math.round(Math.random());
@@ -212,9 +292,10 @@ export class ScanCameraPage {
     }
 
     // Present a denied toast notification
-    alertDenied() {      
+    alertDenied(errorMsg?) {      
+      const msg = !errorMsg ? "Attendee denied access." : errorMsg;
       let toast = this.toastCtrl.create({
-        message: "Attendee denied access.",
+        message: msg,
         duration: notificationTime,
         position: 'top',
         cssClass: 'notify-cancel'
@@ -282,7 +363,7 @@ export class ScanCameraPage {
           sess['isLocked'] = this.session['isLocked'] ? true : false;
           const currentPageIdx = this.navCtrl.getActive().index;
           this.navCtrl.remove(currentPageIdx, 1).then(() => {
-            this.navCtrl.push(ScanCameraPage, sess).then(() => console.log(this.navCtrl.getActive().index));
+            this.navCtrl.push(ScanCameraPage, sess);
           });          
           return false;
         } else if (data === 'prev') {
@@ -290,7 +371,7 @@ export class ScanCameraPage {
           sess['isLocked'] = this.session['isLocked'] ? true : false;
           const currentPageIdx = this.navCtrl.getActive().index;
           this.navCtrl.remove(currentPageIdx, 1).then(() => {            
-            this.navCtrl.insert(1, ScanCameraPage, sess).then(() => console.log(this.navCtrl.getActive().index));
+            this.navCtrl.insert(1, ScanCameraPage, sess);
           });
           return false;
         } else {

@@ -24,7 +24,7 @@ export class ScanCameraService {
         window.addEventListener('orientationchange', () => {
             setTimeout(this.calculatePosition, 700);
         }, false);
-    }  // 
+    }
 
     // Calculate position based off of '#target-bottom' element
     calculatePosition() {
