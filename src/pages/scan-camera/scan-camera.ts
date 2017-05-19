@@ -16,7 +16,6 @@ const notificationTime = 1000;
 })
 export class ScanCameraPage {
 
-    pendingUploadCount: number = 0;
     scannedCount: number = 0;
     accessListCount: number = 0;
     session = {};
@@ -65,9 +64,7 @@ export class ScanCameraPage {
     }
 
     // Set OnDataRead, subscribe to onLineaConnect, calculate position and then turn on camera
-    ionViewDidEnter() {
-      console.log("DidEnter scan-camera");
-      //alert("IONVIEWDIDENTER!");
+    ionViewDidEnter() {      
       (<any>window).OnDataRead = this.onZoneDataRead.bind(this);       
       this.events.subscribe('event:onLineaConnect', this.onLineaConnect);       
       this.scanCameraService.calculatePosition();
@@ -75,9 +72,7 @@ export class ScanCameraPage {
     }
 
     // Shut off camera on leaving, disallow scanning, unsubscribe from events
-    ionViewWillLeave() { 
-      console.log("WillLeave scan-camera");
-      //alert("IONVIEWWILLLEAVE...");   
+    ionViewWillLeave() {   
       this.scanCameraService.turnOff();
       (<any>window).OnDataRead = function(){};
       this.events.unsubscribe('event:onLineaConnect', this.onLineaConnect);
@@ -250,11 +245,6 @@ export class ScanCameraPage {
               
     }
 
-    // Toggle Torch On/Off -- NOT IMPLEMENTED WITH AVE-SESSIONS
-    // toggleLight() {
-    //   this.scanCameraService.toggleTorch();
-    // }
-
     // Turn Front/Back camera
     toggleCamera() {
       this.scanCameraService.toggleCamera();
@@ -357,7 +347,6 @@ export class ScanCameraPage {
     showPopover(ev) {
       this.scanCameraService.turnOff();
       const sessionDetails = {
-        totalPending: this.pendingUploadCount,
         nextSession: this.nextSession,
         prevSession: this.prevSession,
         isLocked: this.session['isLocked']

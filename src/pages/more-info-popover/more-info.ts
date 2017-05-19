@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { NavParams, LoadingController, ToastController, ViewController } from 'ionic-angular';
 
+import { SessionsService } from '../../providers/sessionsService';
+
 @Component({
   selector: 'more-info-popover',
   templateUrl: 'more-info.html'
@@ -11,13 +13,13 @@ export class MoreInfoPopover {
   nextSession: any = {}; 
   locked: boolean = false;   
 
-  constructor(private navParams: NavParams,
+  constructor(
+      private sessionsService: SessionsService,
+      private navParams: NavParams,
       private toastCtrl: ToastController,
       private loadingCtrl: LoadingController,
       private viewCtrl: ViewController
-  ) {
-    
-  }
+  ) { }
   
   // Parse out prev/next sessions, get pendingUploads
   ngOnInit() {
@@ -25,9 +27,14 @@ export class MoreInfoPopover {
     if (d) {
       this.prevSession = d.prevSession;
       this.nextSession = d.nextSession;
-      this.pendingCount = d.totalPending;
       this.locked = d.isLocked;
     }
+  }
+
+  ionViewWillEnter() {
+    this.sessionsService.getTotalCount('uploaded=no&error=no').subscribe((data) => {
+      this.pendingCount = data.Count;
+    });
   }
   
   // Upload Pending Scans
@@ -36,19 +43,27 @@ export class MoreInfoPopover {
       content: `Uploading ${this.pendingCount} scans...`,
       dismissOnPageChange: true
     });    
-    loader.present();
-    // TODO: Faking refresh time
-    setTimeout(() => {
+    loader.present();    
+    this.sessionsService.refreshSessionsThenAccessLists().subscribe((data) => {
       loader.dismiss();
+      const msg = this.pendingCount ? `Finished uploading ${this.pendingCount} scans!` : 'No scans to upload...';
       let toast = this.toastCtrl.create({
-        message: `Finished uploading ${this.pendingCount} scans!`,
+        message: msg,
         duration: 2500,
         position: 'top'
       });
-      this.pendingCount = 0;
       this.viewCtrl.dismiss();
-      toast.present();      
-    }, 3000);
+      toast.present();
+    }, (err) => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: err || `Unable to upload all pending scans...`,
+        duration: 2500,
+        position: 'top'
+      });
+      this.viewCtrl.dismiss();
+      toast.present();
+    });
   }
 
   // Go to prev/next session and remove original session from nav stack

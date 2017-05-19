@@ -5,6 +5,7 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/throw';
 import * as moment from 'moment';
 
 import { InformationService } from './informationService';
@@ -33,6 +34,7 @@ export class SessionsService {
     //  Uploading Services 
     //////////////////////////////////
 
+    // Upload single scan
     upload(scan) {
         const url = `${this.infoService.event.Event.SessionUrl}/UploadSessionScan/${EventGuid.guid}`;
         let { SessionScanGuid, SessionGuid, DeviceId, ScanData, ScanDateTime } = scan;
@@ -46,7 +48,7 @@ export class SessionsService {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
-        return this.http.post(url, d, { headers }).map(res => res.json()).flatMap(() => {
+        return this.http.post(url, d, { headers }).map(res => res.json()).flatMap((resp) => {
             return this.markUploaded(SessionScanGuid);
         }).catch((err) => {
             if (err && err.Fault && err.Fault.Type) {
@@ -67,10 +69,25 @@ export class SessionsService {
         });
     }
 
-    updateCounts() {
-        // TODO: update totalscans, pending, errors, currentSession.pending, currentSession.errors
-        
-    }
+    // Upload all pending scans
+    uploadAllPending() {
+        if (!window.navigator.onLine) {
+            return Observable.throw("Please check your internet connection.");            
+        }  
+        return this.getAllScans('uploaded=no&error=no').flatMap((data) => {
+            if (data.length > 0) {
+                const uploadRequests = data.map((scan) => {
+                    return this.upload(scan).map((d) => d)
+                        .catch((err) => {
+                            return Observable.of(null);
+                        });
+                });
+                return Observable.forkJoin(uploadRequests);
+            } else {
+                return Observable.of([]);
+            }
+        });
+    }    
 
 
     //////////////////////////////////
@@ -186,6 +203,7 @@ export class SessionsService {
         });
     }
 
+    // Mark scan as uploaded
     markUploaded(scanGuid) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans/${scanGuid}/uploaded`, {}).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -195,6 +213,7 @@ export class SessionsService {
         });
     }
 
+    // Mark scan as error
     markError(scanGuid) {
         return this.http.put(`http://localhost/events/${EventGuid.guid}/sessions/scans/${scanGuid}/error`, {}).map(res => res.json()).map((res) => {
             if (!res) {
@@ -228,6 +247,7 @@ export class SessionsService {
         });
     }
 
+    // Get a session from local
     get(sessionGuid) {
         if (this.allSessions.length > 0) {
             const match = this.allSessions.filter((session) => {
@@ -247,14 +267,17 @@ export class SessionsService {
         }
     }
 
+    // Check if attendee is allowed in session
     getAccess(sessionGuid, badgeId) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList/${badgeId}`).map(res => res.json());
     }
 
+    // Get entire access list for a session
     getAccessList(sessionGuid, options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/accessList?${options}`).map(res => res.json());
     }
 
+    // Get scans from a session
     getScans(sessionGuid, options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/${sessionGuid}/scans?${options}`).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -267,6 +290,7 @@ export class SessionsService {
         });
     }
 
+    // Get scans for an event
     getAllScans(options) {
         return this.http.get(`http://localhost/events/${EventGuid.guid}/sessions/scans?${options}`).map(res => res.json()).map((res) => {
             if (res.Fault) {
@@ -471,24 +495,7 @@ export class SessionsService {
                 isLocked: false
             });
         }
-    }
-
-    // Remove props from list of display session props
-    private removeListDisplaySessionProps(arr) {
-        return arr.map(this.removeDisplaySessionProps);
-    }
-
-    // Remove props from display session object
-    private removeDisplaySessionProps(session) {
-        if (session !== null) {
-            delete session.DisplayStartDate;
-            delete session.DisplayRangeDate;
-            delete session.StartTime;
-            delete session.EndTime;
-            delete session.isLocked;            
-        }        
-        return session;
-    }
+    }    
 
     // Sort by start date
     sortByStartDate(arr) {

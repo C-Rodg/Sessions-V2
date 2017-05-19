@@ -109,31 +109,32 @@ export class MyApp {
 
   // Upload pending records
   uploadPendingRecords() {
-      // TODO: UPLOAD PENDING COUNTS...
       let loader = this.loadingCtrl.create({
         content: `Uploading ${this.pendingUploads} Scans...`,
         dismissOnPageChange: true
       });
-      loader.present();
-      this.sessionsService.refreshSessionsAndSave().subscribe((data) => {
+      loader.present();    
+      this.sessionsService.uploadAllPending().subscribe((data) => {
         loader.dismiss();
+        const msg = this.pendingUploads ? `Finished uploading ${this.pendingUploads} scans!` : 'No scans to upload...';
         let toast = this.toastCtrl.create({
-          message: `Finished uploading ${this.pendingUploads} scans!`,
+          message: msg,
           duration: 2500,
           position: 'top'
         });
         toast.present();
-        this.pendingUploads = 0;
+        this.getPendingUploads();
       }, (err) => {
         loader.dismiss();
         let toast = this.toastCtrl.create({
-          message: `Unable to upload all pending scans...`,
+          message: err || 'Unable to upload all pending scans...',
           duration: 2500,
           position: 'top'
         });
         toast.present();
-        this.pendingUploads = 0;
+        this.getPendingUploads();
       });
+      return false;
   }
 
   // Calculate Pending Uploads

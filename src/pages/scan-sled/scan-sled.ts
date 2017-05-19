@@ -15,7 +15,6 @@ const notificationTime = 1000;
 })
 export class ScanSledPage {
     
-    pendingUploadCount: number = 0;
     scannedCount: number = 0;
     accessListCount: number = 0;
     session = {};
@@ -51,8 +50,6 @@ export class ScanSledPage {
       if (this.session['AccessControl']) {
         this.getAccessListCount();
       }
-
-      // TODO: GET PENDING COUNT 
 
       // Get room list, determine prev/next sessions..
       this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
@@ -351,7 +348,6 @@ export class ScanSledPage {
     // Show Popover more info
     showPopover(ev) {
       const sessionDetails = {
-        totalPending: this.pendingUploadCount,
         nextSession: this.nextSession,
         prevSession: this.prevSession,
         isLocked: this.session['isLocked']

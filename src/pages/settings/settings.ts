@@ -21,6 +21,7 @@ export class SettingsPage {
   };
   
   pendingUploads: number = 0;
+  errorCount: number = 0;
 
   constructor(public navCtrl: NavController,
       private toastCtrl: ToastController,
@@ -39,8 +40,21 @@ export class SettingsPage {
     this.infoService.getClientInfo().subscribe(this.buildAboutSection);
     this.events.subscribe('event:onLineaConnect', this.buildAboutSection);
 
+    this.getPendingUploads();
+    this.getErrorCount();
+  }
+
+  // Get pending uploads
+  getPendingUploads() {
     this.sessionsService.getTotalCount('uploaded=no&error=no').subscribe((data) => {
       this.pendingUploads = data.Count;     
+    });
+  }
+
+  // Get Error Count
+  getErrorCount() {
+    this.sessionsService.getTotalCount('uploaded=no&error=yes').subscribe((data) => {
+      this.errorCount = data.Count;
     });
   }
 
@@ -97,16 +111,28 @@ export class SettingsPage {
       dismissOnPageChange: true
     });
     loader.present();
-    setTimeout(() => {
+    this.sessionsService.uploadAllPending().subscribe((data) => {
       loader.dismiss();
+      const msg = this.pendingUploads ? `Finished uploading ${this.pendingUploads} scans!` : 'No scans to upload...';
       let toast = this.toastCtrl.create({
-        message: `Finished uploading ${this.pendingUploads} scans!`,
+        message: msg,
         duration: 2500,
         position: 'top'
       });
       toast.present();
-      this.pendingUploads = 0;
-    }, 4000);
+      this.getPendingUploads();
+      this.getErrorCount();
+    }, (err) => {
+      loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: err || `Unable to upload all pending scans...`,
+        duration: 2500,
+        position: 'top'
+      });
+      toast.present();
+      this.getPendingUploads();
+      this.getErrorCount();
+    });
   }
 
   // Click handler - edit device name

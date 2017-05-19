@@ -40,6 +40,7 @@
         <ion-col center padding-left>
           <h1>Upload Scans</h1>
           <p class="secondary-text">Pending Uploads: {{pendingUploads}}</p>
+          <p class="secondary-text" *ngIf="errorCount > 0">Error Count: {{errorCount}}</p>
         </ion-col>
       </ion-row>
     </ion-card>
