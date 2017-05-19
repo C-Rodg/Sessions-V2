@@ -17,9 +17,11 @@
 
     <ion-card class="current-scan-details">
       <ion-row>
-        <ion-col col-3 text-center class="scan-numbers" stretch>
-          <div class="scan-number">{{scannedCount}}</div>
-          <div center>scans</div>
+        <ion-col col-3 text-center class="scan-numbers" stretch (click)="toggleScanNumbers()">
+          <div *ngIf="showLocalScans" class="scan-number">{{scannedCount}}</div>
+          <div *ngIf="showLocalScans" center>scans</div>
+          <div *ngIf="!showLocalScans" class="scan-number">{{globalCount}}</div>
+          <div *ngIf="!showLocalScans" center>total unique scans</div>
         </ion-col>
         <ion-col class="scan-info" padding-left>
           <h2>{{session.Topic}}</h2>

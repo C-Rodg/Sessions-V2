@@ -5,9 +5,6 @@
     </button>
     <ion-title class="scan__nav__title"><ion-icon name="ios-key-outline" *ngIf="session.AccessControl"></ion-icon> Scan</ion-title>
     <ion-buttons end class="navbar-btns">
-      <!--<button ion-button icon-only (click)="toggleLight()" class="hidden">
-        <ion-icon name="{{scanCameraService.torch === 'OFF' ? 'ios-flash-outline' : 'ios-flash'}}"></ion-icon>
-      </button>-->
       <button ion-button icon-only (click)="toggleCamera()">
         <ion-icon name="reverse-camera"></ion-icon>
       </button>
@@ -22,9 +19,11 @@
   <div class="camera-content-container">
     <ion-card class="current-scan-details" id="target-bottom">
       <ion-row>
-        <ion-col col-3 text-center class="scan-numbers" stretch>
-          <div class="scan-number">{{scannedCount}}</div>
-          <div center>scans</div>
+        <ion-col col-3 text-center class="scan-numbers" stretch (click)="toggleScanNumbers()">
+          <div *ngIf="showLocalScans" class="scan-number">{{scannedCount}}</div>
+          <div *ngIf="showLocalScans" center>scans</div>
+          <div *ngIf="!showLocalScans" class="scan-number">{{globalCount}}</div>
+          <div *ngIf="!showLocalScans" center>total unique</div>
         </ion-col>
         <ion-col class="scan-info" padding-left>
           <h2>{{session.Topic}}</h2>

@@ -18,6 +18,10 @@ export class ScanCameraPage {
 
     scannedCount: number = 0;
     accessListCount: number = 0;
+    globalCount: number = 0;
+
+    showLocalScans: boolean = true;
+
     session = {};
     prevSession = {};
     nextSession = {};
@@ -404,5 +408,19 @@ export class ScanCameraPage {
         });
         toast.present();
       });
+    }
+
+    // Toggle scan numbers between local and global
+    toggleScanNumbers() {
+      if (this.showLocalScans) {
+        this.showLocalScans = false;
+        if (window.navigator.onLine) {
+          this.sessionsService.sessionCountCentral(this.session['SessionGuid']).subscribe((d) => {
+            this.globalCount = d;
+          }, (err) => {});
+        }        
+      } else {
+        this.showLocalScans = true;
+      }
     }
 }

@@ -21,6 +21,9 @@ export class ScanSledPage {
     prevSession = {};
     nextSession = {};
     orderedSessions: Array<any> = [];
+    
+    showLocalScans: boolean = true;
+    globalCount: number = 0;
 
     showAcceptedBackground: boolean = false;
     showDeniedBackground: boolean = false;
@@ -364,5 +367,19 @@ export class ScanSledPage {
           });
         }
       });
+    }
+
+    // Toggle scan numbers between local and global
+    toggleScanNumbers() {
+      if (this.showLocalScans) {
+        this.showLocalScans = false;
+        if (window.navigator.onLine) {
+          this.sessionsService.sessionCountCentral(this.session['SessionGuid']).subscribe((d) => {            
+            this.globalCount = d;
+          }, (err) => {});
+        }        
+      } else {
+        this.showLocalScans = true;
+      }
     }
 }
