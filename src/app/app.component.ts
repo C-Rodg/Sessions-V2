@@ -6,6 +6,7 @@ import { SettingsPage } from '../pages/settings/settings';
 import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 import { InformationService } from '../providers/informationService';
 import { SessionsService } from '../providers/sessionsService';
+import { SettingsService } from '../providers/settingsService';
 
 @Component({
   templateUrl: 'app.html'
@@ -19,14 +20,15 @@ export class MyApp {
   pendingUploads : number = 0;
 
   constructor(
+    private infoService: InformationService,
+        private sessionsService: SessionsService,
+        private settingsService: SettingsService,
         private loadingCtrl: LoadingController,
         private toastCtrl: ToastController,
         private menuCtrl: MenuController,
         private alertCtrl: AlertController,
         private events: Events,
-        private zone: NgZone,
-        private infoService: InformationService,
-        private sessionsService: SessionsService
+        private zone: NgZone        
   ) {
 
     // Create side menu
@@ -41,11 +43,19 @@ export class MyApp {
     // Start up application, if fails just try to set SessionToken, assign allSessions
     this.infoService.startUpApplication().subscribe((data) => {
       this.sessionsService.startUpSessions().subscribe(d => {
+        this.startBackgroundUpload();
+      }, (err) => {
+        this.startBackgroundUpload();
       });
     }, (err) => {
       this.infoService.getAuthToken().subscribe((token) => {
-        this.sessionsService.startUpSessions().subscribe((d) => {});
+        this.sessionsService.startUpSessions().subscribe((d) => {
+          this.startBackgroundUpload();
+        }, (err) => {
+          this.startBackgroundUpload();
+        });
       }, (err) => {
+        this.startBackgroundUpload();
       });
     });
 
@@ -144,5 +154,10 @@ export class MyApp {
         this.pendingUploads = data.Count;
       });      
     });
+  }
+
+  // Start background upload
+  startBackgroundUpload() {
+    this.sessionsService.initializeBackgroundUpload(this.settingsService.backgroundUploadWait);
   }
 }

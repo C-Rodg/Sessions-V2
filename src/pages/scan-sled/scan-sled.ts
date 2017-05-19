@@ -358,10 +358,9 @@ export class ScanSledPage {
         if (data === 'next' || data === 'prev') {
           let sess = data === 'next' ? this.nextSession : this.prevSession;
           sess['isLocked'] = this.session['isLocked'] ? true : false;
-          const dir = data === 'next' ? 'forward' : 'back';
-          this.navCtrl.push(ScanSledPage, sess, { animate: true, direction: dir, animation: 'ios-transition'}).then(() => {
-            const idx = this.navCtrl.getActive().index;
-            this.navCtrl.remove(idx - 1);
+          const currentPageIdx = this.navCtrl.getActive().index;
+          this.navCtrl.remove(currentPageIdx, 1).then(() => {            
+            this.navCtrl.insert(1, ScanSledPage, sess);
           });
         }
       });

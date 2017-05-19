@@ -451,8 +451,14 @@ export class SessionsService {
     }
 
     backgroundUploadAction() {
-        //alert("Get pending uploads and uploading..");
-        // TODO: Get pending uploads and upload...
+        if (!window.navigator.onLine) {
+            return false;
+        }
+        this.uploadAllPending().subscribe((data) => {
+            // Do nothing...
+        }, (err) => {
+            // Do nothing...
+        });
     }
 
     /////////////////////////////////////
