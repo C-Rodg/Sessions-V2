@@ -343,12 +343,13 @@ export class ScanSledPage {
       loader.present();
       this.sessionsService.fetchAccess(this.session['SessionGuid']).subscribe((data) => {        
         loader.dismiss();
+        this.getAccessListCount();
         let toast = this.toastCtrl.create({
           message: "Access list refreshed!",
           duration: 2500,
           position: 'top'
         });
-        toast.present();
+        toast.present();        
       }, (err) => {
         loader.dismiss();
         let toast = this.toastCtrl.create({

@@ -38,10 +38,11 @@ export class SessionsService {
     upload(scan) {
         const url = `${this.infoService.event.Event.SessionUrl}/UploadSessionScan/${EventGuid.guid}`;
         let { SessionScanGuid, SessionGuid, DeviceId, ScanData, ScanDateTime } = scan;
+        const deviceName = DeviceId ? DeviceId : '-NO DEVICE NAME-';
         const d = {
             "scheduleItemGuid": SessionGuid,
             "sessionScanKey": SessionScanGuid,
-            "deviceId": DeviceId,
+            "deviceId": deviceName,
             "badgeId": ScanData,
             "scanDateTime": ScanDateTime.substr(0, ScanDateTime.length - 5) // Remove ms & utc flag from date before '.000Z'
         };

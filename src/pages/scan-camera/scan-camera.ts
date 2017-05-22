@@ -403,6 +403,7 @@ export class ScanCameraPage {
       loader.present();
       this.sessionsService.fetchAccess(this.session['SessionGuid']).subscribe((data) => {
         loader.dismiss();
+        this.getAccessListCount();
         this.scanCameraService.turnOn();
         let toast = this.toastCtrl.create({
           message: "Access list refreshed!",
