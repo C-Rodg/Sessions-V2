@@ -428,12 +428,16 @@ export class ScanCameraPage {
       if (this.showLocalScans) {
         this.showLocalScans = false;
         if (window.navigator.onLine) {
-          this.sessionsService.sessionCountCentral(this.session['SessionGuid']).subscribe((d) => {
+          this.sessionsService.sessionCountCentral(this.session['SessionGuid']).subscribe((d) => {            
             this.globalCount = d;
+            this.scanCameraService.calculatePosition();
+            this.scanCameraService.turnOn();
           }, (err) => {});
         }        
-      } else {
+      } else {        
         this.showLocalScans = true;
+        this.scanCameraService.calculatePosition();
+        this.scanCameraService.turnOn();
       }
     }
 }
