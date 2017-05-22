@@ -96,13 +96,7 @@ export class ScanSledPage {
     }
 
     // Check capacity, parse badge, check access list, check settings, save or deny scan..
-    handleScan(d) {
-      // If capacityCheck is enabled, and current count is >= capacity, block
-      if (this.settingsService.capacityCheck && this.session['Capacity'] && this.session['Capacity'] >= this.scannedCount) {
-        this.soundService.playDenied();
-        this.alertDenied('Session at capacity.');
-        return false;
-      }
+    handleScan(d) {      
     
       let scannedData = d[0].Data,
           symbology = d[0].Symbology,
@@ -144,15 +138,39 @@ export class ScanSledPage {
       scannedId = scannedId.replace(/^\s+|\s+$/g, '');
       
       if (scannedId && scannedId.length < 384) {
-        const newScan = {
+        if (this.settingsService.capacityCheck && this.session['Capacity']) {
+          this.sessionsService.getCount(this.session['SessionGuid'], 'distinct=scan').subscribe((data) => {
+            if (data.Count && data.Count >= this.session['Capacity']) {
+              this.soundService.playDenied();
+              this.alertDenied('Session at capacity.');
+            } else {
+              this.pushNewScan(scannedId);
+            }
+          }, (err) => {
+            this.pushNewScan(scannedId);
+          });
+        } else {
+          this.pushNewScan(scannedId);
+        }        
+      } else {
+        this.soundService.playDenied();
+        this.alertDenied('Invalid badgeId value');
+        return false;
+      }
+
+    }
+
+    // Validate then push new scan
+    pushNewScan(id) {
+      const newScan = {
           "SessionGuid": this.session['SessionGuid'],
-          "ScanData": scannedId,
+          "ScanData": id,
           "DeviceId": this.settingsService.deviceName,
           "ScanDateTime": new Date()
         };
         // Check for access control
         if (this.session['AccessControl'] && this.settingsService.accessControl) {
-          this.sessionsService.getAccess(this.session['SessionGuid'], scannedId).subscribe((data) => {
+          this.sessionsService.getAccess(this.session['SessionGuid'], id).subscribe((data) => {
             if (data.Fault && data.Fault.Type === 'NotFoundFault') {
               this.soundService.playDenied();              
               if (this.settingsService.accessControlOverride) {
@@ -220,12 +238,6 @@ export class ScanSledPage {
             this.alertDenied('There was an issue saving that scan...');
           });
         }
-      } else {
-        this.soundService.playDenied();
-        this.alertDenied('Invalid badgeId value');
-        return false;
-      }
-
     }
 
     // Zone function that sends badge data to be parsed

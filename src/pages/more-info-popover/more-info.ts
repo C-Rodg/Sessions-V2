@@ -34,7 +34,7 @@ export class MoreInfoPopover {
   ionViewWillEnter() {
     this.sessionsService.getTotalCount('uploaded=no&error=no').subscribe((data) => {
       this.pendingCount = data.Count;
-    });
+    }, (err) => {});
   }
   
   // Upload Pending Scans
@@ -44,7 +44,7 @@ export class MoreInfoPopover {
       dismissOnPageChange: true
     });    
     loader.present();    
-    this.sessionsService.refreshSessionsThenAccessLists().subscribe((data) => {
+    this.sessionsService.uploadAllPending().subscribe((data) => {
       loader.dismiss();
       const msg = this.pendingCount ? `Finished uploading ${this.pendingCount} scans!` : 'No scans to upload...';
       let toast = this.toastCtrl.create({
@@ -55,9 +55,10 @@ export class MoreInfoPopover {
       this.viewCtrl.dismiss();
       toast.present();
     }, (err) => {
+      const msg = window.navigator.onLine ? 'Unable to upload all pending' : 'Please check your internet connection...';
       loader.dismiss();
       let toast = this.toastCtrl.create({
-        message: err || `Unable to upload all pending scans...`,
+        message: msg,
         duration: 2500,
         position: 'top'
       });

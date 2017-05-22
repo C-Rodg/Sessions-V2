@@ -113,13 +113,7 @@ export class ScanCameraPage {
     }
 
     // Handle Scanning functionality for onDataRead
-    handleScan(d) {
-      // if capacityCheck is enabled and current count >= capacity, block
-      if (this.settingsService.capacityCheck && this.session['Capacity'] && this.session['Capacity'] >= this.scannedCount) {
-        this.soundService.playDenied();
-        this.alertDenied('Session at capacity.');
-        return false;
-      }
+    handleScan(d) {      
 
       let scannedData = d[0].Data,
           symbology = d[0].Symbology,
@@ -161,82 +155,100 @@ export class ScanCameraPage {
         scannedId = scannedId.replace(/^\s+|\s+$/g, '');
 
         if (scannedId && scannedId.length < 384) {
-          const newScan = {
-            "SessionGuid": this.session["SessionGuid"],
-            "ScanData": scannedId,
-            "DeviceId": this.settingsService.deviceName,
-            "ScanDateTime": new Date()
-          };
-          if (this.session["AccessControl"] && this.settingsService.accessControl) {
-            this.sessionsService.getAccess(this.session['SessionGuid'], scannedId).subscribe((data) => {
-              if (data.Fault && data.Fault.Type === 'NotFoundFault') {
+          if (this.settingsService.capacityCheck && this.session['Capacity']) {
+            this.sessionsService.getCount(this.session['SessionGuid'], 'distinct=scan').subscribe((data) => {
+              if (data.Count && data.Count >= this.session['Capacity']) {
                 this.soundService.playDenied();
-                if (this.settingsService.accessControlOverride) {
-                  // Create confirmation for allow deny attendee
-                  let confirm = this.alertCtrl.create({
-                    title: 'Not on access list',
-                    message: 'Allow this attendee into session?',
-                    cssClass: 'confirm-entry',
-                    buttons: [
-                      {
-                        text: 'Deny',
-                        role: 'cancel',
-                        handler: () => {
-                          this.scanCameraService.turnOn();
-                          this.alertDenied();
-                        }
-                      },
-                      {
-                        text: "Allow",
-                        cssClass: 'confirm-allow',
-                        handler: () => {
-                          this.sessionsService.saveScan(newScan).subscribe((data) => {
-                            this.soundService.playAccepted();
-                            this.scanCameraService.turnOn();
-                            this.alertAllowed();
-                            this.scannedCount += 1;
-                          }, (err) => {
-                            this.scanCameraService.turnOn();
-                            this.alertDenied("There was an issue saving that scan...");
-                          });
-                        }
-                      }
-                    ]
-                  });
-                  this.scanCameraService.turnOff();
-                  confirm.present();
-                } else {
-                  this.alertDenied();
-                }
+                this.alertDenied('Session at capacity.');
               } else {
-                // Allow entry
-                this.sessionsService.saveScan(newScan).subscribe((data) => {
-                  this.soundService.playAccepted();
-                  this.alertAllowed();
-                  this.scannedCount += 1;
-                }, (err) => {
-                  this.soundService.playDenied();
-                  this.alertDenied("There was an issue saving that scan...");
-                });
+                this.pushNewScan(scannedId);
               }
             }, (err) => {
-              this.soundService.playDenied();
-              this.alertDenied('There was an issue checking the access list...');
-            })
-          } else {
-            this.sessionsService.saveScan(newScan).subscribe((data) => {
-              this.soundService.playAccepted();
-              this.alertAllowed();
-              this.scannedCount += 1;
-            }, (err) => {
-              this.soundService.playDenied();
-              this.alertDenied("There was an issue saving that scan...");
+              this.pushNewScan(scannedId);
             });
+          } else {
+            this.pushNewScan(scannedId);
           }
         } else {
           this.soundService.playDenied();
           this.alertDenied('Invalid badgeId value');
           return false;
+        }
+    }
+
+    // Validate and push new scan 
+    pushNewScan(id) {
+        const newScan = {
+          "SessionGuid": this.session["SessionGuid"],
+          "ScanData": id,
+          "DeviceId": this.settingsService.deviceName,
+          "ScanDateTime": new Date()
+        };
+        if (this.session["AccessControl"] && this.settingsService.accessControl) {
+          this.sessionsService.getAccess(this.session['SessionGuid'], id).subscribe((data) => {
+            if (data.Fault && data.Fault.Type === 'NotFoundFault') {
+              this.soundService.playDenied();
+              if (this.settingsService.accessControlOverride) {
+                // Create confirmation for allow deny attendee
+                let confirm = this.alertCtrl.create({
+                  title: 'Not on access list',
+                  message: 'Allow this attendee into session?',
+                  cssClass: 'confirm-entry',
+                  buttons: [
+                    {
+                      text: 'Deny',
+                      role: 'cancel',
+                      handler: () => {
+                        this.scanCameraService.turnOn();
+                        this.alertDenied();
+                      }
+                    },
+                    {
+                      text: "Allow",
+                      cssClass: 'confirm-allow',
+                      handler: () => {
+                        this.sessionsService.saveScan(newScan).subscribe((data) => {
+                          this.soundService.playAccepted();
+                          this.scanCameraService.turnOn();
+                          this.alertAllowed();
+                          this.scannedCount += 1;
+                        }, (err) => {
+                          this.scanCameraService.turnOn();
+                          this.alertDenied("There was an issue saving that scan...");
+                        });
+                      }
+                    }
+                  ]
+                });
+                this.scanCameraService.turnOff();
+                confirm.present();
+              } else {
+                this.alertDenied();
+              }
+            } else {
+              // Allow entry
+              this.sessionsService.saveScan(newScan).subscribe((data) => {
+                this.soundService.playAccepted();
+                this.alertAllowed();
+                this.scannedCount += 1;
+              }, (err) => {
+                this.soundService.playDenied();
+                this.alertDenied("There was an issue saving that scan...");
+              });
+            }
+          }, (err) => {
+            this.soundService.playDenied();
+            this.alertDenied('There was an issue checking the access list...');
+          })
+        } else {
+          this.sessionsService.saveScan(newScan).subscribe((data) => {
+            this.soundService.playAccepted();
+            this.alertAllowed();
+            this.scannedCount += 1;
+          }, (err) => {
+            this.soundService.playDenied();
+            this.alertDenied("There was an issue saving that scan...");
+          });
         }
     }
 
