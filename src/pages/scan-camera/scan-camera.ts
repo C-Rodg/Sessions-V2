@@ -8,6 +8,10 @@ import { SoundService } from '../../providers/soundService';
 import { ScanSledPage } from '../scan-sled/scan-sled';
 import { MoreInfoPopover } from '../more-info-popover/more-info';
 
+import * as moment from 'moment';
+
+//const wrongSessionTime = 600000; // 10 minutes
+const wrongSessionTime = 60000;
 const notificationTime = 1000;
 
 @Component({
@@ -28,6 +32,7 @@ export class ScanCameraPage {
     orderedSessions: Array<any> = [];
 
     leaveCameraMsg: boolean = false;
+    wrongSessionInterval: any;
     
 
     openPassword: boolean = false;
@@ -47,14 +52,13 @@ export class ScanCameraPage {
       private loadingCtrl: LoadingController,
       private popoverCtrl: PopoverController,
       private navCtrl: NavController
-    ) {
+    ) { 
         this.session = this.params.data;
         this.onLineaConnect = this.onLineaConnect.bind(this);
     }
 
     // Get session scan counts, access list counts, determine prev/next sessions
     ionViewWillEnter() {             
-      console.log("Entering scan-camera");
       // Get Session Scan counts
       this.getSessionScanCount();
 
@@ -67,12 +71,15 @@ export class ScanCameraPage {
       this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
     }
 
-    // Set OnDataRead, subscribe to onLineaConnect, calculate position and then turn on camera
+    // Set OnDataRead, subscribe to onLineaConnect, calculate position and then turn on camera, check for wrong session
     ionViewDidEnter() {      
       (<any>window).OnDataRead = this.onZoneDataRead.bind(this);       
       this.events.subscribe('event:onLineaConnect', this.onLineaConnect);       
       this.scanCameraService.calculatePosition();
       this.scanCameraService.turnOn();
+
+      this.checkForWrongSession();
+      this.wrongSessionInterval = setInterval(this.checkForWrongSession.bind(this), wrongSessionTime);
     }
 
     // Shut off camera on leaving, disallow scanning, unsubscribe from events
@@ -80,6 +87,31 @@ export class ScanCameraPage {
       this.scanCameraService.turnOff();
       (<any>window).OnDataRead = function(){};
       this.events.unsubscribe('event:onLineaConnect', this.onLineaConnect);
+      clearInterval(this.wrongSessionInterval);
+    }
+
+    // Check for wrong session loaded
+    checkForWrongSession() {
+      let currentDate = moment();
+      let startDate = moment(this.session['StartDateTime'], 'YYYY-MM-DDTHH:mm:ss.SSS').subtract(2, 'h');    // 2 hours before 
+      let endDate = moment(this.session['EndDateTime'], 'YYYY-MM-DDTHH:mm:ss.SSS').add(5, 'm');             // 5 mins after
+      let msg = "";
+      if (currentDate.isBetween(startDate, endDate, null, '[]')){
+        return false;
+      } else if (currentDate.isBefore(startDate)) {
+        msg = "Session hasn't started..";
+      } else {
+        msg = "This session is over..";
+      }
+      let toast = this.toastCtrl.create({
+        message: msg,
+        position: 'bottom',
+        cssClass: 'wrong-session',
+        showCloseButton: true,
+        closeButtonText: 'Dismiss',
+        dismissOnPageChange: true
+      });
+      toast.present();
     }
 
     // Check if user wants to leave camera page

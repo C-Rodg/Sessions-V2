@@ -7,6 +7,9 @@ import { SoundService } from '../../providers/soundService';
 import { SettingsService } from '../../providers/settingsService';
 import { MoreInfoPopover } from '../more-info-popover/more-info';
 
+import * as moment from 'moment';
+
+const wrongSessionTime = 600000; // 10 minutes
 const notificationTime = 1000;
 
 @Component({
@@ -28,6 +31,8 @@ export class ScanSledPage {
     showAcceptedBackground: boolean = false;
     showDeniedBackground: boolean = false;
     openPassword: boolean = false;
+
+    wrongSessionInterval: any;
     
     constructor(
         private scanSledService: ScanSledService,
@@ -56,12 +61,16 @@ export class ScanSledPage {
 
       // Get room list, determine prev/next sessions..
       this.determineSessionOrder(this.session['Location'], this.session['SessionGuid']);
-    }
+      
+    }    
 
-    // Bind OnDataRead to this class, enable scan button
+    // Bind OnDataRead to this class, enable scan button, check for wrong session
     ionViewDidEnter() {
       (<any>window).OnDataRead = this.onZoneDataRead.bind(this);
       this.scanSledService.sendScanCommand('enableButtonScan');
+
+      this.checkForWrongSession();
+      this.wrongSessionInterval = setInterval(this.checkForWrongSession.bind(this), wrongSessionTime);
     } 
 
     // Disable button scan on leaving, disable OnDataRead function
@@ -69,7 +78,32 @@ export class ScanSledPage {
       this.removeScanClickClass();
       this.scanSledService.sendScanCommand('disableButtonScan');
       (<any>window).OnDataRead = function(){};
+      clearInterval(this.wrongSessionInterval);
     }  
+
+    // Check for wrong session loaded
+    checkForWrongSession() {
+      let currentDate = moment();
+      let startDate = moment(this.session['StartDateTime'], 'YYYY-MM-DDTHH:mm:ss.SSS').subtract(2, 'h');    // 2 hours before 
+      let endDate = moment(this.session['EndDateTime'], 'YYYY-MM-DDTHH:mm:ss.SSS').add(5, 'm');             // 5 mins after
+      let msg = "";
+      if (currentDate.isBetween(startDate, endDate, null, '[]')){
+        return false;
+      } else if (currentDate.isBefore(startDate)) {
+        msg = "Session hasn't started..";
+      } else {
+        msg = "This session is over..";
+      }
+      let toast = this.toastCtrl.create({
+        message: msg,
+        position: 'bottom',
+        cssClass: 'wrong-session',
+        showCloseButton: true,
+        closeButtonText: 'Dismiss',
+        dismissOnPageChange: true
+      });
+      toast.present();
+    }
 
     // Search for all sessions in this room, assign prev/next sessions
     determineSessionOrder(room, guid) {
