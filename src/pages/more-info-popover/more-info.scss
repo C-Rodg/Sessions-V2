@@ -39,6 +39,26 @@ more-info-popover {
                 font-size: 14px;
             }
         }
+
+        .pop-session-header {
+            font-weight: bold;
+            text-align: left;
+            font-size: 115%;            
+        }
+    }
+
+    .pop-item.title {
+        background-color: #f6f6f6;
+
+        ion-label {
+            margin: 0;
+        }
+    }
+
+    .pop-item.session {
+        ion-label {
+            margin: 5px 2px 5px 0;
+        }
     }
 
     .more-info-popover {

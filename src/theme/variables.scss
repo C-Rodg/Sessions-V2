@@ -138,9 +138,6 @@ $alert-md-input-border-color-focused: color($colors, p-primary);
   .toast-wrapper {
     background-color: color($colors, p-danger) !important;
   }
-  .toast-message {
-    font-size: 90%;
-  }
 }
 
 // Attendee allowed/denied notifications

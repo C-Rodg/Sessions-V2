@@ -409,8 +409,8 @@ export class ScanSledPage {
           let sess = data === 'next' ? this.nextSession : this.prevSession;
           sess['isLocked'] = this.session['isLocked'] ? true : false;
           const currentPageIdx = this.navCtrl.getActive().index;
-          this.navCtrl.remove(currentPageIdx, 1).then(() => {            
-            this.navCtrl.insert(1, ScanSledPage, sess);
+          this.navCtrl.remove(currentPageIdx, 1, {duration: 0}).then(() => {            
+            this.navCtrl.insert(1, ScanSledPage, sess, {duration: 0}); //animate:false
           });
         }
       });

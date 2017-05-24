@@ -134,8 +134,8 @@ export class ScanCameraPage {
               text: "Leave", 
               handler: () => {
                 this.leaveCameraMsg = false;
-                this.navCtrl.pop({ animate: false });
-                this.navCtrl.push(ScanSledPage, this.session, {animate: false});
+                this.navCtrl.pop({ animate: false, duration: 0 });
+                this.navCtrl.push(ScanSledPage, this.session, {animate: false, duration: 0});
               }
             }
           ]
@@ -406,16 +406,16 @@ export class ScanCameraPage {
           let sess = this.nextSession;
           sess['isLocked'] = this.session['isLocked'] ? true : false;
           const currentPageIdx = this.navCtrl.getActive().index;
-          this.navCtrl.remove(currentPageIdx, 1).then(() => {
-            this.navCtrl.push(ScanCameraPage, sess);
+          this.navCtrl.remove(currentPageIdx, 1, {duration: 0}).then(() => {
+            this.navCtrl.push(ScanCameraPage, sess, {duration: 0});
           });          
           return false;
         } else if (data === 'prev') {
           let sess = this.prevSession;
           sess['isLocked'] = this.session['isLocked'] ? true : false;
           const currentPageIdx = this.navCtrl.getActive().index;
-          this.navCtrl.remove(currentPageIdx, 1).then(() => {            
-            this.navCtrl.insert(1, ScanCameraPage, sess);
+          this.navCtrl.remove(currentPageIdx, 1, {duration: 0}).then(() => {            
+            this.navCtrl.insert(1, ScanCameraPage, sess, {duration: 0});
           });
           return false;
         } else {

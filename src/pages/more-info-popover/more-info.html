@@ -10,11 +10,20 @@
                 </ion-row>
             </button>
 
-            <button ion-item class="pop-item" (tap)="goToSession('prev')" *ngIf="prevSession.Topic  && !locked">
+            <div class="pop-item title" ion-item *ngIf="(prevSession.Topic || nextSession.Topic)  && !locked">
+                <ion-row>
+                    <ion-col col-2></ion-col>
+                    <ion-col>
+                        <div class="pop-session-header">Sessions in this Room:</div>
+                    </ion-col>
+                </ion-row>
+            </div>
+
+            <button ion-item class="pop-item session" (tap)="goToSession('prev')" *ngIf="prevSession.Topic  && !locked">
                 <ion-row>                
-                    <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-back"></ion-icon></ion-col>
+                    <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-dropleft"></ion-icon></ion-col>
                     <ion-col class="pop__data">
-                        <div class="control">Previous Session:</div>
+                        <div class="control" style="display:none;">Previous:</div>
                         <div class="title">{{prevSession.Topic}}</div>
                         <div class="date">{{prevSession.DisplayStartDate}}</div>
                         <div class="time">{{prevSession.StartTime}}</div>
@@ -22,11 +31,11 @@
                 </ion-row>
             </button>
 
-            <button ion-item class="pop-item" (tap)="goToSession('next')" *ngIf="nextSession.Topic && !locked">
+            <button ion-item class="pop-item session" (tap)="goToSession('next')" *ngIf="nextSession.Topic && !locked">
                 <ion-row>                
-                    <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-forward"></ion-icon></ion-col>
+                    <ion-col class="pop__icon" col-2><ion-icon name="ios-arrow-dropright"></ion-icon></ion-col>
                     <ion-col class="pop__data">
-                        <div class="control">Next Session:</div>
+                        <div class="control" style="display:none;">Next:</div>
                         <div class="title">{{nextSession.Topic}}</div>
                         <div class="date">{{nextSession.DisplayStartDate}}</div>
                         <div class="time">{{nextSession.StartTime}}</div>

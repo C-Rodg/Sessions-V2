@@ -23,7 +23,7 @@ export class SessionsPage {
       private sessionsService: SessionsService,
       private infoService: InformationService    
     ) { 
-  }
+  }  
 
   // Go to the session detail page
   goToSession(session) {
