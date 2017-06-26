@@ -27,7 +27,16 @@ export class SessionsService {
 
     // Assign props - allSessions, scheduleStartDate, scheduleEndDate, filterDate, and rooms
     startUpSessions() {
-        return this.all().flatMap(() => this.refreshRoomsAndDates());
+        const lastSync = window.localStorage.getItem(`${EventGuid.guid}_sync`);
+        if (lastSync === moment().format('YYYY-MM-DD')) {
+            return this.all().flatMap(() => this.refreshRoomsAndDates());
+        } else if (window.navigator.onLine) {
+            return this.refreshSessionsThenAccessLists().catch(() => {
+                return this.all().flatMap(() => this.refreshRoomsAndDates());
+            });
+        } else {
+            return this.all().flatMap(() => this.refreshRoomsAndDates());
+        }
     }
 
     //////////////////////////////////
@@ -79,8 +88,10 @@ export class SessionsService {
             if (data.length > 0) {
                 const uploadRequests = data.map((scan) => {
                     return this.upload(scan).map((d) => d)
-                        .catch((err) => {
-                            return Observable.of(null);
+                        .catch((err) => {                            
+                            return Observable.of({
+                                error: true
+                            });
                         });
                 });
                 return Observable.forkJoin(uploadRequests);
@@ -403,7 +414,10 @@ export class SessionsService {
 
     // Refresh sessions and access lists, update local props - allSessions, rooms, scheduleStartDate, scheduleEndDate
     refreshSessionsThenAccessLists() {
-        return this.refreshSessionsAndSave().flatMap(() => this.refreshAccessListsAndSave()).flatMap(() => this.refreshRoomsAndDates());
+        return this.refreshSessionsAndSave().flatMap(() => this.refreshAccessListsAndSave()).flatMap(() => {
+            window.localStorage.setItem(`${EventGuid.guid}_sync`, moment().format('YYYY-MM-DD'));
+            return this.refreshRoomsAndDates()
+        });
     }
 
     // Update scheduleStartDate, scheduleEndDate, set filterDate if not yet set

@@ -113,13 +113,31 @@ export class SettingsPage {
     loader.present();
     this.sessionsService.uploadAllPending().subscribe((data) => {
       loader.dismiss();
-      const msg = this.pendingUploads ? `Finished uploading ${this.pendingUploads} scans!` : 'No scans to upload...';
+      let errorCount = 0;
+      if (data) {
+        data.forEach((sched) => {
+          if (sched.hasOwnProperty('error') && sched['error']) {
+            errorCount++;
+          }
+        });
+      }
+
+      const msg = (this.pendingUploads && (data.length - errorCount > 0)) ? `Finished uploading ${data.length - errorCount} scans!` : 'No scans to upload...';
       let toast = this.toastCtrl.create({
         message: msg,
         duration: 2500,
         position: 'top'
       });
       toast.present();
+      if (errorCount > 0) {
+        let toast = this.toastCtrl.create({
+          message: `${errorCount} scans were unable to be uploaded..`,
+          showCloseButton: true,
+          position: 'bottom',
+          cssClass: 'wrong-session'
+        });
+        toast.present();
+      }
       this.getPendingUploads();
       this.getErrorCount();
     }, (err) => {

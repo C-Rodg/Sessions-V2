@@ -7,6 +7,7 @@ import { ScanCameraPage } from '../pages/scan-camera/scan-camera';
 import { InformationService } from '../providers/informationService';
 import { SessionsService } from '../providers/sessionsService';
 import { SettingsService } from '../providers/settingsService';
+import { EventGuid } from '../helpers/eventGuid';
 
 @Component({
   templateUrl: 'app.html'
@@ -39,22 +40,36 @@ export class MyApp {
       { title: 'Settings', component: SettingsPage, icon: 'settings'},
       { title: 'Exit', component: '', icon: 'exit'}
     ]; 
+
+    const syncTime = window.localStorage.getItem(`${EventGuid.guid}_sync`);
+    let loader = this.loadingCtrl.create({
+      content: 'Loading Sessions...',
+      dismissOnPageChange: true
+    });
+    if (!syncTime) {          
+      loader.present(); 
+    }
     
     // Start up application, if fails just try to set SessionToken, assign allSessions
     this.infoService.startUpApplication().subscribe((data) => {
       this.sessionsService.startUpSessions().subscribe(d => {
+        loader.dismiss();
         this.startBackgroundUpload();
       }, (err) => {
+        loader.dismiss();
         this.startBackgroundUpload();
       });
     }, (err) => {
       this.infoService.getAuthToken().subscribe((token) => {
         this.sessionsService.startUpSessions().subscribe((d) => {
+          loader.dismiss();
           this.startBackgroundUpload();
         }, (err) => {
+          loader.dismiss();
           this.startBackgroundUpload();
         });
       }, (err) => {
+        loader.dismiss();
         this.startBackgroundUpload();
       });
     });
@@ -126,13 +141,30 @@ export class MyApp {
       loader.present();    
       this.sessionsService.uploadAllPending().subscribe((data) => {
         loader.dismiss();
-        const msg = this.pendingUploads ? `Finished uploading ${this.pendingUploads} scans!` : 'No scans to upload...';
+        let errorCount = 0;
+        if (data) {
+          data.forEach((sched) => {
+            if (sched.hasOwnProperty('error') && sched['error']) {
+              errorCount++;
+            }
+          });
+        }
+        const msg = (this.pendingUploads && (data.length - errorCount > 0)) ? `Finished uploading ${data.length - errorCount} scans!` : 'No scans to upload...';
         let toast = this.toastCtrl.create({
           message: msg,
           duration: 2500,
           position: 'top'
         });
         toast.present();
+        if (errorCount > 0) {
+          let toast = this.toastCtrl.create({
+            message: `${errorCount} scans were unable to be uploaded..`,
+            showCloseButton: true,
+            position: 'bottom',
+            cssClass: 'wrong-session'
+          });
+          toast.present();
+        }
         this.getPendingUploads();
       }, (err) => {
         loader.dismiss();
