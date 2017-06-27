@@ -46,14 +46,31 @@ export class MoreInfoPopover {
     loader.present();    
     this.sessionsService.uploadAllPending().subscribe((data) => {
       loader.dismiss();
-      const msg = this.pendingCount ? `Finished uploading ${this.pendingCount} scans!` : 'No scans to upload...';
+      let errorCount = 0;
+      if (data) {
+        data.forEach((sched) => {
+          if (sched.hasOwnProperty('error') && sched['error']) {
+            errorCount++;
+          }
+        });
+      }
+      const msg = (this.pendingCount && (data.length - errorCount > 0)) ? `Finished uploading ${data.length - errorCount} scans!` : 'No scans to upload...';
       let toast = this.toastCtrl.create({
         message: msg,
         duration: 2500,
         position: 'top'
       });
-      this.viewCtrl.dismiss();
       toast.present();
+      if (errorCount > 0) {
+        let errorToast = this.toastCtrl.create({
+          message: `${errorCount} scans were unable to be uploaded..`,
+          showCloseButton: true,
+          position: 'bottom',
+          cssClass: 'wrong-session'
+        });
+        errorToast.present();
+      }
+      this.viewCtrl.dismiss();      
     }, (err) => {
       const msg = window.navigator.onLine ? 'Unable to upload all pending' : 'Please check your internet connection...';
       loader.dismiss();

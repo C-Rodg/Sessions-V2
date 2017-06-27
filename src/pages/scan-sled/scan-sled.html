@@ -50,7 +50,7 @@
 
 <ion-footer class="scan-footer">
   <ion-toolbar color="p-primary">
-    <ion-title>{{session.Location}}</ion-title>
+    <ion-title>{{session.Location}} <span *ngIf="session.Capacity > 0">[{{session.Capacity}}]</span></ion-title>
     <ion-buttons right>
       <button ion-button icon-only (click)="refreshAccessList()" *ngIf="session.AccessControl" class="m-r-10">
         <span class="ac-count">{{accessListCount}}</span><ion-icon name='refresh'></ion-icon>
