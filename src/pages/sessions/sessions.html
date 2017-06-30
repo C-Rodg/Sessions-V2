@@ -38,6 +38,7 @@
             <p>{{session.Location}}</p>
             <p class="list__sessiondetials--top">{{session.StartTime}} - {{session.EndTime}}</p>
             <div *ngIf="session.AccessControl" class="list__tracking"><ion-icon name="ios-key-outline"></ion-icon></div>
+            <div *ngIf="session.CheckInMode" class="list__tracking"><ion-icon name="ios-person-add-outline"></ion-icon></div>
           </ion-item>
         </ion-list>
       </ion-card>

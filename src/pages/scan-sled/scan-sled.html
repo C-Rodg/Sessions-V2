@@ -3,7 +3,8 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title class="scan__nav__title"><ion-icon name="ios-key-outline" *ngIf="session.AccessControl"></ion-icon> Scan</ion-title>  
+    <ion-title class="scan__nav__title" *ngIf="!session.CheckInMode"><ion-icon name="ios-key-outline" *ngIf="session.AccessControl"></ion-icon> Scan</ion-title> 
+    <ion-title class="scan__nav__title" *ngIf="session.CheckInMode"><ion-icon name="person-add"></ion-icon> Check-in Mode</ion-title> 
     <ion-buttons end>
       <button ion-button icon-only (click)="showPopover($event)">
         <ion-icon name="more"></ion-icon>

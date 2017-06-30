@@ -509,8 +509,10 @@ export class SessionsService {
                 displayDates['DisplayStartDate'] = start.format('ddd, MMM Do') + ' - ';
                 displayDates['DisplayRangeDate'] = end.format('ddd, MMM Do, YYYY');
             }
+            const CheckInMode = (session.Category.toUpperCase().replace(/\W+/g, "") === 'CHECKIN' && session.Description) ? true : false;
             return Object.assign({}, session, displayDates, {
-                AccessControl,        
+                AccessControl,
+                CheckInMode,        
                 StartTime: start.format('h:mm A'),
                 EndTime: end.format('h:mm A'),       
                 isLocked: false
