@@ -6,6 +6,7 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
+import 'rxjs/add/observable/forkJoin';
 import * as moment from 'moment';
 
 import { InformationService } from './informationService';
@@ -45,6 +46,8 @@ export class SessionsService {
 
     // Upload single scan
     upload(scan) {
+        console.log("UPLOAD FUNC");
+        console.log(scan);
         const url = `${this.infoService.event.Event.SessionUrl}/UploadSessionScan/${EventGuid.guid}`;
         let { SessionScanGuid, SessionGuid, DeviceId, ScanData, ScanDateTime } = scan;
         const deviceName = DeviceId ? DeviceId : '-NO DEVICE NAME-';
@@ -58,7 +61,7 @@ export class SessionsService {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
-        return this.http.post(url, d, { headers }).map(res => res.json()).flatMap((resp) => {
+        return this.http.post(url, d, { headers }).map(res => res.json()).flatMap((resp) => {            
             return this.markUploaded(SessionScanGuid);
         }).catch((err) => {
             if (err && err.Fault && err.Fault.Type) {
@@ -79,24 +82,115 @@ export class SessionsService {
         });
     }
 
+    // Post to Partner Web Service, post to session, and mark uploaded
+    postAndUpload(scan) {
+        console.log("POSTandUPLOAD FUNC");
+        console.log(scan);
+        const sessionUrl = `${this.infoService.event.Event.SessionUrl}/UploadSessionScan/${EventGuid.guid}`;
+        let { SessionScanGuid, SessionGuid, DeviceId, ScanData, ScanDateTime, HannahGuid } = scan;
+        const deviceName = DeviceId ? DeviceId : '-NO DEVICE NAME-';
+        const sessionData = {
+            "scheduleItemGuid": SessionGuid,
+            "sessionScanKey": SessionScanGuid,
+            "deviceId": deviceName,
+            "badgeId": ScanData,
+            "scanDateTime": ScanDateTime.substr(0, ScanDateTime.length - 5) // Remove ms & utc flag from date before '.000Z'
+        };
+        let sessionHeaders = new Headers();
+        sessionHeaders.append('Content-Type', 'application/json');
+        sessionHeaders.append('Authorization', `ValidarSession token="${this.infoService.getCurrentToken()}"`);
+
+        const pwsUrl = 'https://registration.validar.com/WebServices/V1/Partner/PartnerService.asmx';
+        let pwsHeaders = new Headers();
+        pwsHeaders.append('Content-Type', 'text/xml; charset=utf-8');
+        pwsHeaders.append('SOAPAction', 'https://portal.validar.com/PutRegistrationData');
+        let scanTime = moment(ScanDateTime);
+        let scanTimeStr = "";
+        if (scanTime.isValid()) {
+            scanTimeStr = scanTime.format('YYYY-MM-DD HH:mm:ss');
+        } else {
+            scanTimeStr = moment().format('YYYY-MM-DD HH:mm:ss');
+        }
+        const pwsUpdates = `<update><registrantId>${ScanData}</registrantId><attended>true</attended><firstCheckInDateTime>${scanTimeStr}</firstCheckInDateTime></update>`;
+        const pwsBody = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>'+
+                            '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
+                                '<soap:Header>'+
+                                    '<AuthenticationSoapHeader xmlns="https://portal.validar.com/">'+
+						                '<Username>crodgers@validar.com</Username>'+
+						                '<Password>curtisv4lid4r!</Password>'+
+						            '</AuthenticationSoapHeader>'+
+                                '<soap:Body>'+
+        						    '<PutRegistrationData xmlns="https://portal.validar.com/">'+
+                                        `<eventGuid>${HannahGuid}</eventGuid>`+
+                                        '<data><![CDATA['+
+                                        '<updates>'+
+                                        pwsUpdates +
+                                        '</updates>'+
+        							']]></data>'+
+						            '</PutRegistrationData>'+
+						        '</soap:Body>'+
+						    '</soap:Envelope>';
+
+            const sessionReq = this.http.post(sessionUrl, sessionData, sessionHeaders).map(res => res.json());
+            const pwsReq = this.http.post(pwsUrl, pwsBody, pwsHeaders).map(res => res.json());
+
+            return Observable.forkJoin([sessionReq, pwsReq]).flatMap((requests) => {
+                console.log("REQUESTS FROM POSTandUPLOAD");
+                console.log(requests);
+                return this.markUploaded(SessionScanGuid);
+            });
+    }
+
     // Upload all pending scans
     uploadAllPending() {
         if (!window.navigator.onLine) {
             return Observable.throw("Please check your internet connection.");            
         }  
-        return this.getAllScans('uploaded=no&error=no').flatMap((data) => {
-            if (data.length > 0) {
-                const uploadRequests = data.map((scan) => {
-                    return this.upload(scan).map((d) => d)
-                        .catch((err) => {                            
-                            return Observable.of({
-                                error: true
+        return this.all().flatMap((sessions: any) => {
+            const checkIns = sessions.filter((sesh) => {
+                return (sesh.Category.toUpperCase().replace(/\W+/g, "") === 'CHECKIN') && (sesh.Description);                
+            });
+            if (checkIns && checkIns.length > 0) {
+                return Observable.of(checkIns[0]);
+            } else {
+                return Observable.of(null);
+            }
+        }).flatMap((checkIns) => {
+            if (!checkIns) {
+                return this.getAllScans('uploaded=no&error=no').flatMap((data) => {
+                    if (data && data.length > 0) {
+                        const uploadRequests = data.map((scan) => {
+                            return this.upload(scan).map((d) => d).catch((err) => {
+                                return Observable.of({ error: true });
                             });
                         });
+                        return Observable.forkJoin(uploadRequests);
+                    } else {
+                        return Observable.of([]);
+                    }
                 });
-                return Observable.forkJoin(uploadRequests);
             } else {
-                return Observable.of([]);
+                return this.getAllScans('uploaded=no&error=no').flatMap((data) => {
+                    if (data && data.length > 0) {
+                        alert("DATA FROM SCANS");
+                        alert(JSON.stringify(data));
+                        const uploadRequests = data.map((scan) => {
+                            if (scan.SessionGuid.toUpperCase() === checkIns['SessionGuid'].toUpperCase()) {
+                                scan['HannahGuid'] = checkIns['Description'];                                
+                                return this.postAndUpload(scan).map(d => d).catch((err) => {
+                                    return Observable.of({ error: true });
+                                });
+                            } else {
+                                return this.upload(scan).map(d => d).catch((err) => {
+                                    return Observable.of({ error: true });
+                                });
+                            }
+                        })                        
+                        return Observable.forkJoin(uploadRequests);
+                    } else {
+                        return Observable.of([]);
+                    }
+                });
             }
         });
     }    
