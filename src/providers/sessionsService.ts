@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers } from '@angular/http';
+import { Http, Headers, Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/catch';
@@ -46,8 +46,6 @@ export class SessionsService {
 
     // Upload single scan
     upload(scan) {
-        console.log("UPLOAD FUNC");
-        console.log(scan);
         const url = `${this.infoService.event.Event.SessionUrl}/UploadSessionScan/${EventGuid.guid}`;
         let { SessionScanGuid, SessionGuid, DeviceId, ScanData, ScanDateTime } = scan;
         const deviceName = DeviceId ? DeviceId : '-NO DEVICE NAME-';
@@ -84,8 +82,6 @@ export class SessionsService {
 
     // Post to Partner Web Service, post to session, and mark uploaded
     postAndUpload(scan) {
-        console.log("POSTandUPLOAD FUNC");
-        console.log(scan);
         const sessionUrl = `${this.infoService.event.Event.SessionUrl}/UploadSessionScan/${EventGuid.guid}`;
         let { SessionScanGuid, SessionGuid, DeviceId, ScanData, ScanDateTime, HannahGuid } = scan;
         const deviceName = DeviceId ? DeviceId : '-NO DEVICE NAME-';
@@ -119,6 +115,7 @@ export class SessionsService {
 						                '<Username>crodgers@validar.com</Username>'+
 						                '<Password>curtisv4lid4r!</Password>'+
 						            '</AuthenticationSoapHeader>'+
+                                '</soap:Header>'+
                                 '<soap:Body>'+
         						    '<PutRegistrationData xmlns="https://portal.validar.com/">'+
                                         `<eventGuid>${HannahGuid}</eventGuid>`+
@@ -131,13 +128,41 @@ export class SessionsService {
 						        '</soap:Body>'+
 						    '</soap:Envelope>';
 
-            const sessionReq = this.http.post(sessionUrl, sessionData, sessionHeaders).map(res => res.json());
-            const pwsReq = this.http.post(pwsUrl, pwsBody, pwsHeaders).map(res => res.json());
+            const sessionReq = this.http.post(sessionUrl, sessionData, { headers: sessionHeaders }).map(res => res.json()).catch((err) => {
+                if (err instanceof Response) {
+                    err = err.json();
+                }
+                if (err && err.Fault && err.Fault.Type) {
+                    if (err.Fault.Type === 'AlreadyExistsFault') {
+                        return Observable.of(null);
+                    } else if (err.Fault.Type === 'NotTrackingAttendanceFault') {
+                        return Observable.of({error: true});
+                    } else if (err.Fault.Type === 'InvalidSessionFault') {
+                        return this.infoService.updateToken().flatMap(() => {
+                            return Observable.throw("UpdatedToken");
+                        });
+                    } else {
+                        alert("Upload error: " + JSON.stringify(err));
+                        return Observable.throw(err);
+                    }
+                }
+                return Observable.throw(err);
+            });
+            const pwsReq = this.http.post(pwsUrl, pwsBody, {headers: pwsHeaders}).map(res => res.text()).catch((err) => {                
+                return Observable.of({error: true});
+            });
 
             return Observable.forkJoin([sessionReq, pwsReq]).flatMap((requests) => {
-                console.log("REQUESTS FROM POSTandUPLOAD");
-                console.log(requests);
-                return this.markUploaded(SessionScanGuid);
+                if((requests[0].hasOwnProperty('error') && requests[0].error) || (requests[1].hasOwnProperty('error') && requests[1].error) ) {
+                    return Observable.throw({error: true});
+                }
+                if (requests[1].indexOf('Success') > -1) {
+                    return this.markUploaded(SessionScanGuid);
+                } else {
+                    return Observable.throw({error: true});
+                }
+            }).catch((err) => {               
+                return Observable.throw({error: true});
             });
     }
 
@@ -172,8 +197,6 @@ export class SessionsService {
             } else {
                 return this.getAllScans('uploaded=no&error=no').flatMap((data) => {
                     if (data && data.length > 0) {
-                        alert("DATA FROM SCANS");
-                        alert(JSON.stringify(data));
                         const uploadRequests = data.map((scan) => {
                             if (scan.SessionGuid.toUpperCase() === checkIns['SessionGuid'].toUpperCase()) {
                                 scan['HannahGuid'] = checkIns['Description'];                                
@@ -181,11 +204,11 @@ export class SessionsService {
                                     return Observable.of({ error: true });
                                 });
                             } else {
-                                return this.upload(scan).map(d => d).catch((err) => {
+                                return this.upload(scan).map(d => d).catch((err) => {                                    
                                     return Observable.of({ error: true });
                                 });
                             }
-                        })                        
+                        });                    
                         return Observable.forkJoin(uploadRequests);
                     } else {
                         return Observable.of([]);
