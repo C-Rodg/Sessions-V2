@@ -112,8 +112,8 @@ export class SessionsService {
                             '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
                                 '<soap:Header>'+
                                     '<AuthenticationSoapHeader xmlns="https://portal.validar.com/">'+
-						                '<Username>crodgers@validar.com</Username>'+
-						                '<Password>curtisv4lid4r!</Password>'+
+						                '<Username>USERNAME</Username>'+
+						                '<Password>PASS!</Password>'+
 						            '</AuthenticationSoapHeader>'+
                                 '</soap:Header>'+
                                 '<soap:Body>'+
