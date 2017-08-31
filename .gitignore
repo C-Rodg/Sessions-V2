@@ -34,3 +34,8 @@ Thumbs.db
 UserInterfaceState.xcuserstate
 
 backups/
+
+# Ignore Index
+src/index.html
+
+src/sounds/

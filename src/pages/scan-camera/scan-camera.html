@@ -3,8 +3,10 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title class="scan__nav__title" *ngIf="!session.CheckInMode"><ion-icon name="ios-key-outline" *ngIf="session.AccessControl"></ion-icon> Scan</ion-title>
-    <ion-title class="scan__nav__title" *ngIf="session.CheckInMode"><ion-icon name="person-add"></ion-icon> Check-in</ion-title>
+    <ion-title class="scan__nav__title" *ngIf="!session.CheckInMode">
+      <ion-icon name="ios-key-outline" *ngIf="session.AccessControl"></ion-icon> Scan</ion-title>
+    <ion-title class="scan__nav__title" *ngIf="session.CheckInMode">
+      <ion-icon name="person-add"></ion-icon> Check-in</ion-title>
     <ion-buttons end class="navbar-btns">
       <button ion-button icon-only (click)="toggleCamera()">
         <ion-icon name="reverse-camera"></ion-icon>
@@ -34,9 +36,9 @@
         </ion-col>
       </ion-row>
     </ion-card>
-    
+
     <div id="camera-target"></div>
-  </div>  
+  </div>
 </ion-content>
 
 <ion-footer class="scan-footer">

@@ -17,7 +17,8 @@
     </ion-item>
     <ion-item>
       <ion-label>Date:</ion-label>
-      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{sessionsService.scheduleStartDate}}" max="{{sessionsService.scheduleEndDate}}" [(ngModel)]="sessionsService.filterDate"></ion-datetime>
+      <ion-datetime displayFormat="DDDD, MMMM D, YYYY" min="{{sessionsService.scheduleStartDate}}" max="{{sessionsService.scheduleEndDate}}"
+        [(ngModel)]="sessionsService.filterDate"></ion-datetime>
     </ion-item>
     <ion-item class="picker">
       <ion-label>Room:</ion-label>
@@ -25,23 +26,29 @@
         <div class="picker-text">{{filterRoom}}</div>
         <button aria-haspopup="true" class="item-cover" ion-button="item-cover" type="button" (click)="openFilterRooms()"></button>
       </div>
-    </ion-item>    
+    </ion-item>
   </ion-toolbar>
 </ion-header>
 
 <div class="{{showSearchFilter ? 'search-open sessions-wrapper' : 'sessions-wrapper'}}">
-    <div *ngFor="let session of (sessionsService.allSessions | filterDates:sessionsService.filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)">
-      <ion-card tappable (tap)="goToSession(session)">
-        <ion-list no-lines class="list__session">
-          <ion-item class="list__sessiondetails">
-            <h2>{{session.Topic}}</h2>
-            <p>{{session.Location}}</p>
-            <p class="list__sessiondetials--top">{{session.StartTime}} - {{session.EndTime}}</p>
-            <div *ngIf="session.AccessControl" class="list__tracking"><ion-icon name="ios-key-outline"></ion-icon></div>
-            <div *ngIf="session.CheckInMode" class="list__tracking"><ion-icon name="ios-person-add-outline"></ion-icon></div>
-          </ion-item>
-        </ion-list>
-      </ion-card>
-    </div>
-</div>
 
+  <div *ngFor="let session of (sessionsService.allSessions | filterDates:sessionsService.filterDate | filterRooms:filterRoom | filterSessionText:filterSearch)"
+    tappable (tap)="goToSession(session)">
+    <ion-card>
+      <ion-list no-lines class="list__session">
+        <ion-item class="list__sessiondetails">
+          <h2>{{session.Topic}}</h2>
+          <p>{{session.Location}}</p>
+          <p class="list__sessiondetials--top">{{session.StartTime}} - {{session.EndTime}}</p>
+          <div *ngIf="session.AccessControl" class="list__tracking">
+            <ion-icon name="ios-key-outline"></ion-icon>
+          </div>
+          <div *ngIf="session.CheckInMode" class="list__tracking">
+            <ion-icon name="ios-person-add-outline"></ion-icon>
+          </div>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+  </div>
+
+</div>

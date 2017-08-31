@@ -105,7 +105,21 @@
           <p class="secondary-text">{{aboutDevice.appInfo}}</p>
           <p class="secondary-text">{{aboutDevice.deviceInfo}}</p>
           <p class="secondary-text">Sled-scanner: {{aboutDevice.scannerStatus}}</p>
-          <p class="secondary-text">Cameras: front <ion-icon name="{{'ios-' + aboutDevice.cameraFront }}"></ion-icon> | back <ion-icon name="{{'ios-' + aboutDevice.cameraBack }}"></ion-icon></p>
+          <p class="secondary-text">Cameras: front
+            <ion-icon name="{{'ios-' + aboutDevice.cameraFront }}"></ion-icon> | back
+            <ion-icon name="{{'ios-' + aboutDevice.cameraBack }}"></ion-icon>
+          </p>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+    <ion-card class="inline-card-button" (tap)="sendDiagnostics()">
+      <ion-row>
+        <ion-col class="inline-card-icon" col-3 text-center stretch>
+          <ion-icon name="ios-pulse-outline"></ion-icon>
+        </ion-col>
+        <ion-col center padding-left>
+          <h1>Send Diagnostics</h1>
         </ion-col>
       </ion-row>
     </ion-card>

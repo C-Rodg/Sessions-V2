@@ -1,68 +1,68 @@
 scan-camera {
+	.content-md {
+		background-color: #e5e5e5;
+	}
 
-    .content-md {
-        background-color: #e5e5e5;
-    }
+	#camera-target {
+		margin-bottom: 10px;
+		width: 100%;
+		flex-grow: 1;
+	}
 
-    #camera-target {
-        margin-bottom: 10px;
-        width: 100%;
-        flex-grow: 1;
-    }
+	.scan__nav__title {
+		ion-icon {
+			margin-right: 8px;
+			font-size: 2rem;
+		}
+	}
 
-    .scan__nav__title {
-        ion-icon {
-            margin-right: 8px;
-            font-size: 2rem;
-        }
-    }
+	.camera-content-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
 
-    .camera-content-container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
+	.current-scan-details {
+		.scan-numbers {
+			line-height: 1.2;
+			background-color: color($colors, p-primary);
+			color: color($colors, p-text);
+			border-right: 1px solid color($colors, p-divider);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
 
-    .current-scan-details {
-        .scan-numbers {
-            line-height: 1.2;
-            background-color: color($colors, p-primary);
-            color: color($colors, p-text);
-            border-right: 1px solid color($colors, p-divider);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+			.scan-number {
+				font-size: 3.1rem;
+			}
+		}
+		.scan-info {
+			h2 {
+				margin: 0 0 2px 0;
+				font-weight: bold;
+			}
 
-            .scan-number {
-                font-size: 3.1rem;
-            }
-        }
-        .scan-info {
-            h2 {
-                margin: 0 0 2px 0;
-                font-weight: bold;
-            }
+			p {
+				margin: 0;
+				line-height: 1.2;
+			}
 
-            p {
-                margin: 0;
-                line-height: 1.2;
-            }
+			.date,
+			.range-date {
+				color: #666;
+			}
 
-            .date, .range-date {
-                color: #666;
-            }
+			.time {
+				padding-top: 2px;
+				font-size: 1.6rem;
+			}
+		}
+	}
 
-            .time {
-                padding-top: 2px;
-                font-size: 1.6rem;
-            }
-        }
-    }
-
-    .scan-footer {
-        .ac-count {
-            font-size: 120%;
-        }
-    }
+	.scan-footer {
+		.ac-count {
+			font-size: 120%;
+		}
+	}
 }
