@@ -4,7 +4,8 @@ import {
 	ToastController,
 	LoadingController,
 	ModalController,
-	Events
+	Events,
+	AlertController
 } from "ionic-angular";
 
 import { DeviceModal } from "./device-modal/device-modal";
@@ -35,6 +36,7 @@ export class SettingsPage {
 		private toastCtrl: ToastController,
 		private loadingCtrl: LoadingController,
 		private modalCtrl: ModalController,
+		private alertCtrl: AlertController,
 		private infoService: InformationService,
 		private settingsService: SettingsService,
 		private sessionsService: SessionsService,
@@ -204,8 +206,8 @@ export class SettingsPage {
 		this.settingsService.storeCurrentSettings();
 	}
 
-	// Send Diagnostics to validar
-	sendDiagnostics() {
+	// Service to send diagnostics to Validar
+	sendDiagnosticsToValidar() {
 		this.sessionsService.getAllScans("uploaded=no&error=no").subscribe(data => {
 			const deviceData = {
 				errorType: "AVE-Session Diagnostic",
@@ -224,5 +226,27 @@ export class SettingsPage {
 				});
 			}
 		});
+	}
+
+	// Send Diagnostics button clicked
+	sendDiagnostics() {
+		let confirm = this.alertCtrl.create({
+			title: "Send Diagnostics to Validar?",
+			message:
+				"You are about to send client diagnostic information used for troubleshooting to Validar. Do you wish to proceed?",
+			buttons: [
+				{
+					text: "Cancel",
+					role: "cancel"
+				},
+				{
+					text: "Send",
+					handler: () => {
+						this.sendDiagnosticsToValidar();
+					}
+				}
+			]
+		});
+		confirm.present();
 	}
 }
